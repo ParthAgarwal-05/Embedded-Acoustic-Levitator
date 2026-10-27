@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Acoustic Levitator — Mission Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Orbitron:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="stars-bg"></div>
+  <div class="glow-sphere glow-1"></div>
+  <div class="glow-sphere glow-2"></div>
+
+  <!-- Top Navigation & System Status Bar -->
+  <header class="top-bar">
+    <div class="brand">
+      <div class="logo-icon">
+        <span class="wave-ring ring-1"></span>
+        <span class="wave-ring ring-2"></span>
+        <span class="particle-dot"></span>
+      </div>
+      <div class="brand-text">
+        <h1>ACOUSTIC LEVITATOR <span class="badge-pro">PRO 8-TX</span></h1>
+        <p class="subtitle">2D Acoustic Trapping & Positioning (4 Top + 4 Bottom)</p>
+      </div>
+    </div>
+
+    <div class="top-telemetry">
+      <div class="telemetry-pill">
+        <span class="pill-label">CARRIER</span>
+        <span class="pill-value text-cyan" id="top-freq-display">40,000 Hz</span>
+      </div>
+      <div class="telemetry-pill">
+        <span class="pill-label">Z-PHASE</span>
+        <span class="pill-value text-purple" id="top-phase-display">0°</span>
+      </div>
+      <div class="telemetry-pill">
+        <span class="pill-label">X-STEER</span>
+        <span class="pill-value text-amber" id="top-steer-display">0°</span>
+      </div>
+      <div class="status-indicator connected" id="connection-badge">
+        <span class="status-pulse"></span>
+        <span class="status-text" id="connection-status-text">ESP32 ONLINE</span>
+      </div>
+      <button class="settings-btn" id="network-toggle-btn" title="Target IP / Simulation Mode">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Connection Configuration Modal / Flyout -->
+  <div class="config-flyout" id="config-flyout">
+    <div class="flyout-header">
+      <h4>Connection Endpoint</h4>
+      <button class="close-flyout-btn" id="close-flyout">&times;</button>
+    </div>
+    <div class="flyout-body">
+      <label for="esp-ip-input">ESP32 IP Address or Hostname:</label>
+      <div class="input-with-button">
+        <input type="text" id="esp-ip-input" value="192.168.4.1" placeholder="192.168.4.1 or localhost">
+        <button id="apply-ip-btn" class="btn-primary-sm">Connect</button>
+      </div>
+      <div class="mode-switch-group">
+        <label class="switch-container">
+          <input type="checkbox" id="sim-mode-toggle">
+          <span class="switch-slider"></span>
+        </label>
+        <span class="switch-desc">Hardware Emulation Mode (Offline Preview)</span>
+      </div>
+      <p class="hint-text">Default AP mode: Connect phone/PC Wi-Fi to <strong>Acoustic-Levitator</strong> and open <strong>192.168.4.1</strong>.</p>
+    </div>
+  </div>
+
+  <!-- Main Grid Dashboard -->
+  <main class="dashboard-grid">
+
+    <!-- Column 1: 2D Particle Motion Controller (Up/Down/Left/Right) -->
+    <section class="card motion-card">
+      <div class="card-header">
+        <div class="header-title">
+          <span class="header-icon">✦</span>
+          <h3>2D Particle Positioning</h3>
+        </div>
+        <span class="header-tag">ACOUSTIC STEERING</span>
+      </div>
+
+      <div class="dpad-wrapper">
+        <div class="dpad-container">
+          <button class="dpad-btn btn-up" id="btn-up" title="Move Up (Arrow Up / W)">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-8 8h6v8h4v-8h6z"/></svg>
+            <span class="btn-lbl">UP (Z+)</span>
+          </button>
+          <button class="dpad-btn btn-left" id="btn-left" title="Move Left (Arrow Left / A)">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 12l8-8v6h8v4h-8v6z"/></svg>
+            <span class="btn-lbl">LEFT (X-)</span>
+          </button>
+          <button class="dpad-btn btn-center" id="btn-center" title="Reset to Trapping Center (Space)">
+            <span class="center-crosshair"></span>
+            <span class="btn-lbl">CENTER</span>
+          </button>
+          <button class="dpad-btn btn-right" id="btn-right" title="Move Right (Arrow Right / D)">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 12l-8 8v-6H4v-4h8V4z"/></svg>
+            <span class="btn-lbl">RIGHT (X+)</span>
+          </button>
+          <button class="dpad-btn btn-down" id="btn-down" title="Move Down (Arrow Down / S)">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 20l8-8h-6V4h-4v8H4z"/></svg>
+            <span class="btn-lbl">DOWN (Z-)</span>
+          </button>
+        </div>
+
+        <!-- Position Coordinates Readout -->
+        <div class="coordinate-readout">
+          <div class="coord-box">
+            <span class="coord-label">X-OFFSET (STEER)</span>
+            <span class="coord-value" id="val-x-offset">0.0 mm</span>
+            <span class="coord-sub" id="val-x-phase">Phase: 0°</span>
+          </div>
+          <div class="coord-box">
+            <span class="coord-label">Z-HEIGHT (TRAP)</span>
+            <span class="coord-value" id="val-z-offset">0.0 mm</span>
+            <span class="coord-sub" id="val-z-phase">Phase: 0°</span>
+          </div>
+        </div>
+
+        <!-- Motion Step Size Selector -->
+        <div class="step-selector-group">
+          <span class="control-label">Step Sensitivity:</span>
+          <div class="segmented-control">
+            <button class="seg-btn" data-step="1">Fine (0.2 mm)</button>
+            <button class="seg-btn active" data-step="4">Normal (0.8 mm)</button>
+            <button class="seg-btn" data-step="8">Coarse (1.6 mm)</button>
+          </div>
+        </div>
+
+        <div class="keyboard-hints">
+          <span>Keyboard Shortcuts:</span>
+          <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or <kbd>&uarr;</kbd><kbd>&larr;</kbd><kbd>&darr;</kbd><kbd>&rarr;</kbd> &bull; <kbd>Space</kbd> Center
+        </div>
+      </div>
+    </section>
+
+    <!-- Column 2: Acoustic Cavity Hologram / Live Visualizer -->
+    <section class="card visualizer-card">
+      <div class="card-header">
+        <div class="header-title">
+          <span class="header-icon">◈</span>
+          <h3>Cavity Standing Wave Hologram</h3>
+        </div>
+        <div class="visualizer-actions">
+          <span class="badge-mode" id="standing-wave-mode-badge">0° IN-PHASE (D ≈ 25.7mm)</span>
+          <button class="btn-icon" id="toggle-interference-btn" title="Toggle Wavefield Vectors">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M12 2v20M5 5l14 14M19 5L5 19"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="cavity-canvas-container">
+        <!-- Canvas renders Top 3 Transducers, Bottom 3 Transducers, Wavefield, and Levitating Particle -->
+        <canvas id="cavity-canvas"></canvas>
+
+        <div class="canvas-overlay-stats">
+          <div class="overlay-stat">
+            <span>CAVITY GAP (D):</span> <strong>25.7 mm</strong>
+          </div>
+          <div class="overlay-stat">
+            <span>ACOUSTIC λ:</span> <strong>8.58 mm</strong>
+          </div>
+          <div class="overlay-stat">
+            <span>NODE SPACING:</span> <strong>4.29 mm</strong>
+          </div>
+          <div class="overlay-stat">
+            <span>DIFF. VOLTAGE:</span> <strong>24 Vpp</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Action Toolbar Under Cavity -->
+      <div class="cavity-quick-bar">
+        <button class="btn-action-glow btn-phase-toggle" id="btn-toggle-phase">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+          <span>FLIP PHASE (0° &harr; 180°)</span>
+          <span class="btn-hotkey">[P]</span>
+        </button>
+
+        <button class="btn-action-glow btn-sweep" id="btn-trigger-sweep">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 16c2-4 4-10 6-10s4 8 6 4"/></svg>
+          <span>RUN AUTO-SWEEP</span>
+          <span class="btn-hotkey">[S]</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Column 3: Frequency & Array Power Control Center -->
+    <section class="card controls-card">
+      <div class="card-header">
+        <div class="header-title">
+          <span class="header-icon">⚡</span>
+          <h3>Ultrasonic Carrier & Power</h3>
+        </div>
+        <span class="header-tag">PWM ENGINE</span>
+      </div>
+
+      <!-- Frequency Master Gauge -->
+      <div class="freq-section">
+        <div class="freq-header">
+          <span class="control-label">Ultrasonic Drive Frequency</span>
+          <span class="resonance-tag">Piezo Resonance: ~40.0 kHz</span>
+        </div>
+
+        <div class="freq-display-box">
+          <span class="freq-num" id="main-freq-value">40,000</span>
+          <span class="freq-unit">Hz</span>
+        </div>
+
+        <!-- Fine Stepper Buttons -->
+        <div class="freq-buttons-grid">
+          <button class="btn-freq-step" id="freq-minus-500">-500 Hz</button>
+          <button class="btn-freq-step" id="freq-minus-100">-100 Hz [-]</button>
+          <button class="btn-freq-step" id="freq-reset">40.0 kHz</button>
+          <button class="btn-freq-step" id="freq-plus-100">+100 Hz [+]</button>
+          <button class="btn-freq-step" id="freq-plus-500">+500 Hz</button>
+        </div>
+
+        <!-- Frequency Range Slider -->
+        <div class="slider-wrapper">
+          <div class="slider-labels">
+            <span>38,000 Hz</span>
+            <span class="slider-current-label" id="slider-tooltip">40,000 Hz</span>
+            <span>42,000 Hz</span>
+          </div>
+          <input type="range" id="freq-slider" min="38000" max="42000" step="50" value="40000">
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Bank Power Toggles (Top Array vs Bottom Array) -->
+      <div class="arrays-power-section">
+        <span class="control-label">Array Channel Isolation</span>
+        
+        <div class="array-toggle-grid">
+          <!-- Top Array Switch -->
+          <div class="array-card active" id="card-top-array">
+            <div class="array-card-header">
+              <div class="array-indicator"></div>
+              <div>
+                <h4>Top Array (4x Tx)</h4>
+                <p>Pins: GPIO 4 &amp; 5 &bull; Facing DOWN</p>
+              </div>
+            </div>
+            <button class="btn-array-toggle" id="btn-toggle-top">
+              <span class="state-text">ACTIVE</span>
+              <span class="btn-hotkey">[T]</span>
+            </button>
+          </div>
+
+          <!-- Bottom Array Switch -->
+          <div class="array-card active" id="card-bot-array">
+            <div class="array-card-header">
+              <div class="array-indicator"></div>
+              <div>
+                <h4>Bottom Array (4x Tx)</h4>
+                <p>Pins: GPIO 18 &amp; 19 &bull; Facing UP</p>
+              </div>
+            </div>
+            <button class="btn-array-toggle" id="btn-toggle-bot">
+              <span class="state-text">ACTIVE</span>
+              <span class="btn-hotkey">[B]</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Hardware Telemetry & Sweep Monitor -->
+      <div class="telemetry-section">
+        <div class="telemetry-row">
+          <span>Clock Source:</span>
+          <strong>ESP32 APB 80 MHz</strong>
+        </div>
+        <div class="telemetry-row">
+          <span>Timer Resolution:</span>
+          <strong>8-bit (256 ticks / cycle)</strong>
+        </div>
+        <div class="telemetry-row">
+          <span>CPU Overhead:</span>
+          <strong class="text-emerald">0.0% (Direct Silicon PWM)</strong>
+        </div>
+        <div class="telemetry-row">
+          <span>Phase Jitter:</span>
+          <strong class="text-emerald">&lt; 1.2 ns (Hardware-Locked)</strong>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Live Serial / Event Console Footer -->
+  <footer class="console-footer">
+    <div class="console-header">
+      <div class="console-title">
+        <span class="terminal-dot"></span>
+        <span>TELEMETRY &amp; EVENT LOG STREAM</span>
+      </div>
+      <div class="console-actions">
+        <button class="console-btn" id="btn-clear-console">Clear</button>
+        <button class="console-btn" id="btn-status-query">[?] Refresh Status</button>
+      </div>
+    </div>
+    <div class="console-body" id="console-stream">
+      <div class="log-entry system"><span class="log-time">[BOOT]</span> Acoustic Levitator Mission Control Initialized. System ready.</div>
+      <div class="log-entry info"><span class="log-time">[PWM]</span> 40.000 kHz square wave active on APB hardware timer.</div>
+      <div class="log-entry info"><span class="log-time">[TRAP]</span> Dual 3-Transducer array standing wave active. In-phase mode.</div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

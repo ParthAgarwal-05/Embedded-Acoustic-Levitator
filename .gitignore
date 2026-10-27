@@ -1,0 +1,32 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverrideA
+
+# Presentations & drafts (not essential)
+*.pptx
+
+# Extra test/doc files (not part of the core project)
+TEST_2_TRANSMITTERS.md
+TEST_4_TRANSMITTERS.md
+PROJECT_SUMMARY.txt
+
+# Old/extra wiring file (8Tx version — not this project)
+Acoustic_Levitator_8Tx_Wiring.xlsx
+
+# Schematics PDF (large binary, optional)
+# Uncomment next line to also exclude the schematic PDF
+# acoustic_levitator_schematic.pdf
+
+# Nanolev subproject / experiments
+nanolev/
+
+# Node modules (if any)
+node_modules/
+
+# Build artifacts
+*.o
+*.elf
+*.bin
+*.hex
+build/
