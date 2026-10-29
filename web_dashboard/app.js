@@ -132,21 +132,18 @@ function drawAcousticCavity() {
   const bottomTransducerY = H - 45;
   const cavityMidY = (topTransducerY + bottomTransducerY) / 2;
   const centerX = W / 2;
-  const transducerSpacing = 80;
+  const transducerSpacing = 75;
 
-  // 1. Draw Transducer Arrays (4 Top, 4 Bottom)
-  const transducerSpacing = 65;
+  // 1. Draw Transducer Arrays (3 Top, 3 Bottom)
   const topTransducers = [
-    { x: centerX - 1.5 * transducerSpacing, label: 'Tx 1' },
-    { x: centerX - 0.5 * transducerSpacing, label: 'Tx 2' },
-    { x: centerX + 0.5 * transducerSpacing, label: 'Tx 3' },
-    { x: centerX + 1.5 * transducerSpacing, label: 'Tx 4' }
+    { x: centerX - transducerSpacing, label: 'Tx 1' },
+    { x: centerX,                     label: 'Tx 2' },
+    { x: centerX + transducerSpacing, label: 'Tx 3' }
   ];
   const botTransducers = [
-    { x: centerX - 1.5 * transducerSpacing, label: 'Tx 5' },
-    { x: centerX - 0.5 * transducerSpacing, label: 'Tx 6' },
-    { x: centerX + 0.5 * transducerSpacing, label: 'Tx 7' },
-    { x: centerX + 1.5 * transducerSpacing, label: 'Tx 8' }
+    { x: centerX - transducerSpacing, label: 'Tx 1' },
+    { x: centerX,                     label: 'Tx 2' },
+    { x: centerX + transducerSpacing, label: 'Tx 3' }
   ];
 
   // Draw Top Plate
@@ -159,7 +156,7 @@ function drawAcousticCavity() {
   ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
   ctx.font = '9px "JetBrains Mono"';
   ctx.textAlign = 'center';
-  ctx.fillText('TOP ARRAY (4x TRANSMITTERS - FACING DOWN)', centerX, 23);
+  ctx.fillText('TOP ARRAY (3x TRANSMITTERS - FACING DOWN)', centerX, 23);
 
   // Draw Bottom Plate
   ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
@@ -169,7 +166,7 @@ function drawAcousticCavity() {
   ctx.strokeRect(centerX - 150, H - 30, 300, 20);
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-  ctx.fillText('BOTTOM ARRAY (4x TRANSMITTERS - FACING UP)', centerX, H - 17);
+  ctx.fillText('BOTTOM ARRAY (3x TRANSMITTERS - FACING UP)', centerX, H - 17);
 
   // Render individual transducer horns
   function renderHorn(x, y, isTop, active, label) {
