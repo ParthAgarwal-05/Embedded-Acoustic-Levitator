@@ -2,7 +2,7 @@
  * =====================================================================================
  *  6-Transducer Ultrasonic Acoustic Levitator (3 Top + 3 Bottom)
  * =====================================================================================
- *  Microcontroller: ESP32 DevKit (GPIO 4, 5, 18, 19)
+ *  Microcontroller: ESP32 DevKit / NodeMCU-32S (GPIO 4, 5, 18, 19)
  *  Drivers:         2x L293D Dual H-Bridge ICs (Differential Push-Pull Drive, 24V p-p from 12V)
  *                   - IC 1: Top Array (3 Transducers: 2 on Bridge 1, 1 on Bridge 2)
  *                   - IC 2: Bottom Array (3 Transducers: 2 on Bridge 1, 1 on Bridge 2)
@@ -19,26 +19,28 @@
  * 
  *  Power Connections (Both IC 1 & IC 2):
  *  -----------------------------------------------------------------------------------
- *  5V (from LM2596 OUT+) ---> Pin 1 (1,2EN), Pin 9 (3,4EN), Pin 16 (VCC1) & ESP32 VIN
- *  12V (+) (from Power)  ---> Pin 8 (VCC2) & LM2596 IN+
+ *  12V (+) (from Power)  ---> Pin 8 (VCC2) on both ICs & LM2596 IN+
  *  Common GND            ---> Pins 4, 5, 12, 13, LM2596 IN-/OUT-, & ESP32 GND
+ *  5V (from LM2596 OUT+) ---> Pin 1 (1,2EN), Pin 9 (3,4EN), Pin 16 (VCC1) on both ICs & ESP32 VIN
  * 
  *  Transducer Outputs:
  *  -----------------------------------------------------------------------------------
- *  IC 1 Bridge 1: Pin 3 (1Y) & Pin 6 (2Y)   ---> Top Transducers #1 & #2 (Parallel)
- *  IC 1 Bridge 2: Pin 14 (4Y) & Pin 11 (3Y) ---> Top Transducer #3
- *  IC 2 Bridge 1: Pin 3 (1Y) & Pin 6 (2Y)   ---> Bottom Transducers #1 & #2 (Parallel)
- *  IC 2 Bridge 2: Pin 14 (4Y) & Pin 11 (3Y) ---> Bottom Transducer #3
+ *  IC 1 Bridge 1: Pin 3 (1Y) & Pin 6 (2Y)   ---> Top Transducers #1 & #2 (Parallel: (+) to 3, (-) to 6)
+ *  IC 1 Bridge 2: Pin 14 (4Y) & Pin 11 (3Y) ---> Top Transducer #3 ((+) to 14, (-) to 11)
+ *  IC 2 Bridge 1: Pin 3 (1Y) & Pin 6 (2Y)   ---> Bottom Transducers #1 & #2 (Parallel: (+) to 3, (-) to 6)
+ *  IC 2 Bridge 2: Pin 14 (4Y) & Pin 11 (3Y) ---> Bottom Transducer #3 ((+) to 14, (-) to 11)
  *  -----------------------------------------------------------------------------------
  * 
- *  Control Interfaces:
- *    1. Web Dashboard: Connect to Wi-Fi hotspot or ESP32 AP ("Acoustic-Levitator" / "12345678")
+ *  Dual Control:
+ *    1. Web Dashboard (Connect to Wi-Fi hotspot or ESP32 AP "Acoustic-Levitator" / "12345678")
  *    2. Serial Monitor (115200 Baud):
- *       'p' : Toggle Phase (0 deg In-Phase <-> 180 deg Anti-Phase)
+ *       'p'       : Toggle Phase (0 deg In-Phase <-> 180 deg Anti-Phase)
  *       '+' / '-' : Tune frequency +/- 100 Hz
  *       'u' / 'd' : Translate particle UP / DOWN (+/- 4 ticks / ~5.6 deg)
+ *       'w' / 's' : Move particle UP / DOWN
+ *       'c'       : Center particle (Reset Z-phase to 0 deg)
  *       't' / 'b' : Toggle Top Array / Bottom Array ON / OFF
- *       's'       : Auto-sweep frequency (38.5 kHz - 41.5 kHz)
+ *       'x'       : Auto-sweep frequency (38.5 kHz - 41.5 kHz)
  *       '?'       : Print live system status
  * =====================================================================================
  */
@@ -80,10 +82,11 @@ const char* AP_PASS  = "12345678";
 #define CH_BOT_B  LEDC_CHANNEL_3
 
 // ---------------------- System State -------------------------
-uint32_t currentFreq  = 40000;  // Nominal 40 kHz
-uint8_t  botPhaseTick = 0;      // 0 = 0 deg (In-phase), 128 = 180 deg (Anti-phase)
-bool     topEnabled   = true;
-bool     botEnabled   = true;
+uint32_t currentFreq   = 40000; // Nominal 40 kHz
+uint8_t  botPhaseTick  = 0;     // 0 = 0 deg (In-phase), 128 = 180 deg (Anti-phase)
+int8_t   xSteerTick    = 0;     // Virtual horizontal tilt (-64..+64)
+bool     topEnabled    = true;
+bool     botEnabled    = true;
 String   wifiStatusMsg = "Starting...";
 
 WebServer server(80);
@@ -96,12 +99,16 @@ void updateTopOutput();
 void printStatus();
 void setupWiFi();
 void setupWebServer();
+void sendCORSHeaders();
+void sendJsonResponse();
 void handleRoot();
 void handleStatus();
 void handleFreq();
 void handlePhase();
+void handleMove();
 void handleToggle();
 void handleSweep();
+void handleOptions();
 
 // ---------------------- HTML / Web Dashboard -----------------
 const char INDEX_HTML[] PROGMEM = R"rawliteral(
@@ -120,6 +127,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
       --violet: #a855f7;
       --green: #10b981;
       --red: #ef4444;
+      --amber: #f59e0b;
       --text: #e2e8f0;
       --text-dim: #94a3b8;
     }
@@ -218,9 +226,6 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
       gap: 10px;
       margin-top: 14px;
     }
-    .btn-group-3 {
-      grid-template-columns: repeat(3, 1fr);
-    }
     button {
       background: rgba(0, 240, 255, 0.08);
       color: var(--text);
@@ -249,13 +254,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
       background: rgba(168, 85, 247, 0.25);
       border-color: var(--violet);
     }
-    button.btn-active {
-      background: var(--cyan);
-      color: #070a12;
-      border-color: var(--cyan);
-      box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
-    }
-    /* Visualizer canvas */
+    /* Visualizer box */
     .vis-box {
       width: 100%;
       height: 220px;
@@ -272,11 +271,11 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
     }
     .tx-row {
       display: flex;
-      gap: 24px;
+      gap: 32px;
       z-index: 2;
     }
     .tx-horn {
-      width: 32px;
+      width: 38px;
       height: 18px;
       background: #334155;
       border: 1px solid #64748b;
@@ -297,16 +296,16 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
     .tx-top::after { bottom: -5px; }
     .tx-bot::after { top: -5px; }
     .particle {
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
       background: radial-gradient(circle, #ffffff 30%, #38bdf8 100%);
       border-radius: 50%;
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      box-shadow: 0 0 16px rgba(56, 189, 248, 0.9);
-      transition: top 0.25s ease-out;
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.95);
+      transition: top 0.2s ease-out;
       z-index: 3;
     }
     .wave-line {
@@ -337,7 +336,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
 <body>
   <header>
     <div class="brand">
-      <h1>ACOUSTIC LEVITATOR <span>6-TX</span></h1>
+      <h1>ACOUSTIC LEVITATOR <span>PRO 6-TX</span></h1>
       <p>3 Top Horns &middot; 3 Bottom Horns &middot; Hardware 40 kHz Push-Pull</p>
     </div>
     <div class="status-badge" id="wifi-badge">
@@ -352,23 +351,23 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
       <h2>Acoustic Cavity & Particle (Standing Wave)</h2>
       <div class="vis-box">
         <div class="tx-row">
-          <div class="tx-horn tx-top" title="Top Tx #1"></div>
-          <div class="tx-horn tx-top" title="Top Tx #2"></div>
-          <div class="tx-horn tx-top" title="Top Tx #3"></div>
+          <div class="tx-horn tx-top" title="Top Tx #1 (IC1 B1)"></div>
+          <div class="tx-horn tx-top" title="Top Tx #2 (IC1 B1)"></div>
+          <div class="tx-horn tx-top" title="Top Tx #3 (IC1 B2)"></div>
         </div>
         <div class="particle" id="lev-particle"></div>
         <canvas class="wave-line" id="wave-canvas"></canvas>
         <div class="tx-row">
-          <div class="tx-horn tx-bot" title="Bottom Tx #1"></div>
-          <div class="tx-horn tx-bot" title="Bottom Tx #2"></div>
-          <div class="tx-horn tx-bot" title="Bottom Tx #3"></div>
+          <div class="tx-horn tx-bot" title="Bottom Tx #1 (IC2 B1)"></div>
+          <div class="tx-horn tx-bot" title="Bottom Tx #2 (IC2 B1)"></div>
+          <div class="tx-horn tx-bot" title="Bottom Tx #3 (IC2 B2)"></div>
         </div>
       </div>
 
       <div style="margin-top: 16px;">
         <div class="stat-row">
           <span>Target Cavity Separation:</span>
-          <span class="stat-val">34.3 mm (n=8)</span>
+          <span class="stat-val">34.3 mm (n=8) / 25.7 mm (n=6)</span>
         </div>
         <div class="stat-row">
           <span>Operating Mode:</span>
@@ -398,13 +397,13 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
 
       <div class="stat-row" style="margin-top: 18px;">
         <span>Bottom Relative Phase:</span>
-        <span class="stat-val" id="phase-text">180°</span>
+        <span class="stat-val" id="phase-text">0°</span>
       </div>
       <div class="btn-group">
         <button class="btn-violet" id="btn-phase" onclick="togglePhase()">Toggle 0° / 180°</button>
-        <button class="btn-violet" onclick="stepPhase('up')">Move UP (Z+)</button>
-        <button class="btn-violet" onclick="stepPhase('down')">Move DOWN (Z-)</button>
-        <button class="btn-violet" onclick="triggerSweep()">Resonance Sweep</button>
+        <button class="btn-violet" onclick="moveZ('up')">Move UP (Z+)</button>
+        <button class="btn-violet" onclick="moveZ('down')">Move DOWN (Z-)</button>
+        <button class="btn-violet" onclick="centerTrap()">Reset Center</button>
       </div>
 
       <div class="stat-row" style="margin-top: 18px;">
@@ -413,6 +412,9 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
       <div class="btn-group">
         <button id="btn-top" onclick="toggleArray('top')">Top Array (3 Tx): ON</button>
         <button id="btn-bot" onclick="toggleArray('bot')">Bot Array (3 Tx): ON</button>
+      </div>
+      <div style="margin-top: 10px;">
+        <button style="width: 100%;" class="btn-violet" onclick="triggerSweep()">Run Frequency Sweep (38.5 - 41.5 kHz)</button>
       </div>
     </div>
   </div>
@@ -438,15 +440,12 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
       document.getElementById('phase-text').innerText = data.phaseDeg + '° (' + data.phaseTick + '/256)';
       document.getElementById('mode-text').innerText = (data.phaseDeg === 0) ? 'IN-PHASE (0°)' : 'ANTI-PHASE (' + data.phaseDeg + '°)';
       document.getElementById('wifi-label').innerText = data.wifi;
-      document.getElementById('ip-status').innerText = data.wifi;
+      document.getElementById('ip-status').innerText = 'Net: ' + data.wifi;
 
-      // Particle vertical position in visualizer (based on phase tick 0..255)
-      // 0 deg: 50% center, 180 deg: shift slightly, fine steps translate up/down
       const particle = document.getElementById('lev-particle');
-      const offsetPercent = ((data.phaseTick - 128) / 256) * 35; // +/- 17%
+      const offsetPercent = ((data.phaseTick - 128) / 256) * 35;
       particle.style.top = (50 + offsetPercent) + '%';
 
-      // Button states
       document.getElementById('btn-top').innerText = 'Top Array: ' + (topOn ? 'ON' : 'MUTED');
       document.getElementById('btn-bot').innerText = 'Bot Array: ' + (botOn ? 'ON' : 'MUTED');
       document.getElementById('btn-top').style.borderColor = topOn ? 'var(--cyan)' : 'var(--red)';
@@ -469,36 +468,30 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
     async function changeFreq(delta) {
       document.getElementById('log-status').innerText = 'Tuning frequency...';
       const res = await fetch('/api/freq?delta=' + delta);
-      if (res.ok) {
-        const data = await res.json();
-        updateUI(data);
-      }
+      if (res.ok) updateUI(await res.json());
     }
 
     async function togglePhase() {
       document.getElementById('log-status').innerText = 'Toggling Phase...';
       const res = await fetch('/api/phase?toggle=1');
-      if (res.ok) {
-        const data = await res.json();
-        updateUI(data);
-      }
+      if (res.ok) updateUI(await res.json());
     }
 
-    async function stepPhase(dir) {
-      document.getElementById('log-status').innerText = 'Translating node ' + dir + '...';
-      const res = await fetch('/api/phase?step=' + dir);
-      if (res.ok) {
-        const data = await res.json();
-        updateUI(data);
-      }
+    async function moveZ(dir) {
+      document.getElementById('log-status').innerText = 'Moving ' + dir + '...';
+      const res = await fetch('/api/move?dir=' + dir);
+      if (res.ok) updateUI(await res.json());
+    }
+
+    async function centerTrap() {
+      document.getElementById('log-status').innerText = 'Centering trap...';
+      const res = await fetch('/api/move?dir=center');
+      if (res.ok) updateUI(await res.json());
     }
 
     async function toggleArray(which) {
-      const res = await fetch('/api/toggle?array=' + which);
-      if (res.ok) {
-        const data = await res.json();
-        updateUI(data);
-      }
+      const res = await fetch('/api/toggle?target=' + which);
+      if (res.ok) updateUI(await res.json());
     }
 
     async function triggerSweep() {
@@ -506,7 +499,6 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
       fetch('/api/sweep');
     }
 
-    // Draw acoustic standing wave pattern on canvas
     function drawWave() {
       const canvas = document.getElementById('wave-canvas');
       canvas.width = canvas.parentElement.clientWidth;
@@ -577,10 +569,8 @@ void setup() {
 
 // ---------------------- Main Loop ----------------------------
 void loop() {
-  // Handle HTTP client requests
   server.handleClient();
 
-  // Handle Serial Monitor interactive commands
   if (Serial.available()) {
     char cmd = Serial.read();
     if (cmd == '\r' || cmd == '\n') return;
@@ -614,6 +604,8 @@ void loop() {
       // Particle Translation UP / DOWN
       case 'u':
       case 'U':
+      case 'w':
+      case 'W':
         botPhaseTick = (botPhaseTick + 4) % 256;
         updateBottomPhase(botPhaseTick);
         Serial.printf("[MOVE UP] Phase: %u deg (%u/256)\n", (botPhaseTick * 360) / 256, botPhaseTick);
@@ -621,9 +613,19 @@ void loop() {
 
       case 'd':
       case 'D':
+      case 's':
+      case 'S':
         botPhaseTick = (botPhaseTick + 256 - 4) % 256;
         updateBottomPhase(botPhaseTick);
         Serial.printf("[MOVE DOWN] Phase: %u deg (%u/256)\n", (botPhaseTick * 360) / 256, botPhaseTick);
+        break;
+
+      // Reset to Center
+      case 'c':
+      case 'C':
+        botPhaseTick = 0;
+        updateBottomPhase(botPhaseTick);
+        Serial.println("[CENTER] Particle reset to center (Phase: 0 deg).");
         break;
 
       // Array Muting / Isolation
@@ -649,14 +651,14 @@ void loop() {
         break;
 
       // Frequency Sweep
-      case 's':
-      case 'S':
+      case 'x':
+      case 'X':
         Serial.println("\n[SWEEP START] Sweeping 38,500 Hz -> 41,500 Hz...");
         for (uint32_t f = 38500; f <= 41500; f += 200) {
           currentFreq = f;
           ledc_set_freq(LEV_LEDC_MODE, LEV_LEDC_TIMER, currentFreq);
           server.handleClient();
-          delay(400);
+          delay(300);
         }
         Serial.println("[SWEEP FINISHED] Lock frequency with '+' or '-'.\n");
         break;
@@ -795,11 +797,31 @@ void setupWebServer() {
   server.on("/api/status", HTTP_GET, handleStatus);
   server.on("/api/freq", HTTP_GET, handleFreq);
   server.on("/api/phase", HTTP_GET, handlePhase);
+  server.on("/api/move", HTTP_GET, handleMove);
   server.on("/api/toggle", HTTP_GET, handleToggle);
   server.on("/api/sweep", HTTP_GET, handleSweep);
 
+  // CORS OPTIONS preflight handler
+  server.on("/api/status", HTTP_OPTIONS, handleOptions);
+  server.on("/api/freq", HTTP_OPTIONS, handleOptions);
+  server.on("/api/phase", HTTP_OPTIONS, handleOptions);
+  server.on("/api/move", HTTP_OPTIONS, handleOptions);
+  server.on("/api/toggle", HTTP_OPTIONS, handleOptions);
+  server.on("/api/sweep", HTTP_OPTIONS, handleOptions);
+
   server.begin();
   Serial.println("[HTTP SERVER] Web Dashboard Server Active on Port 80.");
+}
+
+void sendCORSHeaders() {
+  server.sendHeader("Access-Control-Allow-Origin", "*");
+  server.sendHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  server.sendHeader("Access-Control-Allow-Headers", "*");
+}
+
+void handleOptions() {
+  sendCORSHeaders();
+  server.send(204);
 }
 
 // ---------------------- HTTP Handlers ------------------------
@@ -809,10 +831,14 @@ void handleRoot() {
 
 void sendJsonResponse() {
   uint32_t deg = (botPhaseTick * 360) / 256;
+  sendCORSHeaders();
+
   String json = "{";
   json += "\"freq\":" + String(currentFreq) + ",";
   json += "\"phaseDeg\":" + String(deg) + ",";
   json += "\"phaseTick\":" + String(botPhaseTick) + ",";
+  json += "\"zPhase\":" + String(botPhaseTick) + ",";
+  json += "\"xSteer\":" + String(xSteerTick) + ",";
   json += "\"topOn\":" + String(topEnabled ? "true" : "false") + ",";
   json += "\"botOn\":" + String(botEnabled ? "true" : "false") + ",";
   json += "\"wifi\":\"" + wifiStatusMsg + "\"";
@@ -840,6 +866,8 @@ void handleFreq() {
 void handlePhase() {
   if (server.hasArg("toggle")) {
     botPhaseTick = (botPhaseTick == 0) ? 128 : 0;
+  } else if (server.hasArg("tick")) {
+    botPhaseTick = server.arg("tick").toInt() % 256;
   } else if (server.hasArg("step")) {
     String step = server.arg("step");
     if (step == "up") {
@@ -855,22 +883,54 @@ void handlePhase() {
   sendJsonResponse();
 }
 
+void handleMove() {
+  if (server.hasArg("zTick")) {
+    botPhaseTick = server.arg("zTick").toInt() % 256;
+    updateBottomPhase(botPhaseTick);
+  }
+  if (server.hasArg("xTick")) {
+    xSteerTick = (int8_t)server.arg("xTick").toInt();
+  }
+  if (server.hasArg("dir")) {
+    String dir = server.arg("dir");
+    if (dir == "up") {
+      botPhaseTick = (botPhaseTick + 4) % 256;
+      updateBottomPhase(botPhaseTick);
+    } else if (dir == "down") {
+      botPhaseTick = (botPhaseTick + 256 - 4) % 256;
+      updateBottomPhase(botPhaseTick);
+    } else if (dir == "center") {
+      botPhaseTick = 0;
+      xSteerTick = 0;
+      updateBottomPhase(botPhaseTick);
+    } else if (dir == "left") {
+      xSteerTick = max(-64, xSteerTick - 4);
+    } else if (dir == "right") {
+      xSteerTick = min(64, xSteerTick + 4);
+    }
+  }
+  sendJsonResponse();
+}
+
 void handleToggle() {
-  if (server.hasArg("array")) {
-    String arr = server.arg("array");
-    if (arr == "top") {
-      topEnabled = !topEnabled;
-      updateTopOutput();
-    } else if (arr == "bot") {
-      botEnabled = !botEnabled;
-      if (botEnabled) {
-        updateBottomPhase(botPhaseTick);
-      } else {
-        ledc_set_duty_with_hpoint(LEV_LEDC_MODE, CH_BOT_A, 0, 0);
-        ledc_set_duty_with_hpoint(LEV_LEDC_MODE, CH_BOT_B, 0, 0);
-        ledc_update_duty(LEV_LEDC_MODE, CH_BOT_A);
-        ledc_update_duty(LEV_LEDC_MODE, CH_BOT_B);
-      }
+  String target = "";
+  if (server.hasArg("target")) target = server.arg("target");
+  else if (server.hasArg("array")) target = server.arg("array");
+
+  if (target == "top") {
+    if (server.hasArg("state")) topEnabled = (server.arg("state").toInt() == 1);
+    else topEnabled = !topEnabled;
+    updateTopOutput();
+  } else if (target == "bot") {
+    if (server.hasArg("state")) botEnabled = (server.arg("state").toInt() == 1);
+    else botEnabled = !botEnabled;
+    if (botEnabled) {
+      updateBottomPhase(botPhaseTick);
+    } else {
+      ledc_set_duty_with_hpoint(LEV_LEDC_MODE, CH_BOT_A, 0, 0);
+      ledc_set_duty_with_hpoint(LEV_LEDC_MODE, CH_BOT_B, 0, 0);
+      ledc_update_duty(LEV_LEDC_MODE, CH_BOT_A);
+      ledc_update_duty(LEV_LEDC_MODE, CH_BOT_B);
     }
   }
   sendJsonResponse();
@@ -878,7 +938,7 @@ void handleToggle() {
 
 void handleSweep() {
   sendJsonResponse();
-  // Perform sweep
+  // Perform smooth frequency sweep
   for (uint32_t f = 38500; f <= 41500; f += 200) {
     currentFreq = f;
     ledc_set_freq(LEV_LEDC_MODE, LEV_LEDC_TIMER, currentFreq);
@@ -903,9 +963,10 @@ void printStatus() {
   Serial.println("---------------- CONTROLS ---------------------");
   Serial.println("  [p]       : Toggle Phase (0 deg <-> 180 deg)");
   Serial.println("  [+] / [-] : Tune Frequency (+/- 100 Hz)");
-  Serial.println("  [u] / [d] : Translate Particle UP / DOWN");
+  Serial.println("  [u] / [d] : Translate Particle UP / DOWN (also [w] / [s])");
+  Serial.println("  [c]       : Reset particle to center");
   Serial.println("  [t] / [b] : Toggle Top Array / Bottom Array ON/OFF");
-  Serial.println("  [s]       : Auto-sweep frequency (38.5 kHz - 41.5 kHz)");
+  Serial.println("  [x]       : Auto-sweep frequency (38.5 kHz - 41.5 kHz)");
   Serial.println("  [?]       : Print status menu");
   Serial.println("-----------------------------------------------\n");
 }
