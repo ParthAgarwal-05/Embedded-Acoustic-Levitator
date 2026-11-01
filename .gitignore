@@ -5,6 +5,7 @@
 
 # Presentations & drafts (not essential)
 *.pptx
+!PPT/*.pptx
 
 # Extra test/doc files (not part of the core project)
 TEST_2_TRANSMITTERS.md
