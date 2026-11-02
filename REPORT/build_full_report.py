@@ -319,14 +319,14 @@ r_title.font.color.rgb = COLOR_BLACK
 # Template Subtitle Block
 p_sub = doc.add_paragraph()
 p_sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
-p_sub.paragraph_format.space_after = Pt(6)
+p_sub.paragraph_format.space_after = Pt(4)
 
 runs_sub = [
     ("A project report submitted in partial fulfilment\n", False, 12),
     ("of the requirements for the degree of\n\n", False, 12),
     ("Bachelor of Technology\n", True, 14),
     ("in\n", False, 12),
-    ("Electronics and Communication Engineering\n\n", True, 14),
+    ("Computer Science and Engineering\n\n", True, 14),
     ("by\n\n", False, 12)
 ]
 for text, is_bold, sz in runs_sub:
@@ -339,8 +339,8 @@ for text, is_bold, sz in runs_sub:
 # Students List (Centered, cleanly formatted text, NO ugly table)
 p_stud = doc.add_paragraph()
 p_stud.alignment = WD_ALIGN_PARAGRAPH.CENTER
-p_stud.paragraph_format.line_spacing = 1.3
-p_stud.paragraph_format.space_after = Pt(36)
+p_stud.paragraph_format.line_spacing = 1.25
+p_stud.paragraph_format.space_after = Pt(16)
 
 stud_list = [
     ("RONIL", "24BCE1330"),
@@ -355,15 +355,38 @@ for s_name, s_reg in stud_list:
     r.font.bold = True
     r.font.color.rgb = COLOR_BLACK
 
+# Guide on Cover Page
+p_cov_guide = doc.add_paragraph()
+p_cov_guide.alignment = WD_ALIGN_PARAGRAPH.CENTER
+p_cov_guide.paragraph_format.line_spacing = 1.2
+p_cov_guide.paragraph_format.space_after = Pt(20)
+
+r_cg1 = p_cov_guide.add_run("Under the guidance of\n")
+r_cg1.font.name = "Times New Roman"
+r_cg1.font.size = Pt(11)
+r_cg1.font.italic = True
+r_cg1.font.color.rgb = COLOR_BLACK
+
+r_cg2 = p_cov_guide.add_run("Dr. Mohammed Aarif K.O.\n")
+r_cg2.font.name = "Times New Roman"
+r_cg2.font.size = Pt(12)
+r_cg2.font.bold = True
+r_cg2.font.color.rgb = COLOR_BLACK
+
+r_cg3 = p_cov_guide.add_run("Professor, School of Computer Science and Engineering (SCOPE)")
+r_cg3.font.name = "Times New Roman"
+r_cg3.font.size = Pt(11)
+r_cg3.font.color.rgb = COLOR_BLACK
+
 # Institution Block (Matching template)
 p_inst = doc.add_paragraph()
 p_inst.alignment = WD_ALIGN_PARAGRAPH.CENTER
-p_inst.paragraph_format.space_before = Pt(20)
+p_inst.paragraph_format.space_before = Pt(16)
 p_inst.paragraph_format.space_after = Pt(0)
 p_inst.paragraph_format.line_spacing = 1.2
 
 inst_runs = [
-    ("School of Electronics Engineering\n", True, 14),
+    ("School of Computer Science and Engineering\n", True, 14),
     ("Vellore Institute of Technology, Chennai\n", True, 14),
     ("Vandalur - Kelambakkam Road\n", False, 12),
     ("Chennai – 600127, India\n\n", False, 12),
@@ -387,7 +410,7 @@ p_dh = doc.add_paragraph()
 p_dh.alignment = WD_ALIGN_PARAGRAPH.CENTER
 p_dh.paragraph_format.space_before = Pt(12)
 p_dh.paragraph_format.space_after = Pt(4)
-r_dh = p_dh.add_run("School of Electronics Engineering\n")
+r_dh = p_dh.add_run("School of Computer Science and Engineering\n")
 r_dh.font.name = "Times New Roman"
 r_dh.font.size = Pt(14)
 r_dh.font.bold = True
@@ -404,7 +427,7 @@ r_dt.font.color.rgb = COLOR_BLACK
 
 add_body_p(
     doc,
-    "We hereby declare that the report titled \"DESIGN AND IMPLEMENTATION OF AN INTERNET-ENABLED ACOUSTIC LEVITATION MANIPULATION SYSTEM USING ESP32 APB CLOCK SYNCHRONIZATION AND DUAL PUSH-PULL TRANSDUCER ARRAYS\" submitted by us to the School of Electronics Engineering, Vellore Institute of Technology, Chennai, in partial fulfilment of the requirements for the award of Bachelor of Technology in Electronics and Communication Engineering, is a bonafide record of the work carried out by us under the supervision of our Project Coordinator.",
+    "We hereby declare that the report titled \"DESIGN AND IMPLEMENTATION OF AN INTERNET-ENABLED ACOUSTIC LEVITATION MANIPULATION SYSTEM USING ESP32 APB CLOCK SYNCHRONIZATION AND DUAL PUSH-PULL TRANSDUCER ARRAYS\" submitted by us to the School of Computer Science and Engineering (SCOPE), Vellore Institute of Technology, Chennai, in partial fulfilment of the requirements for the award of Bachelor of Technology in Computer Science and Engineering, is a bonafide record of the work carried out by us under the supervision of Dr. Mohammed Aarif K.O., Professor, School of Computer Science and Engineering (SCOPE).",
     justify=True
 )
 
@@ -443,7 +466,7 @@ p_ch = doc.add_paragraph()
 p_ch.alignment = WD_ALIGN_PARAGRAPH.CENTER
 p_ch.paragraph_format.space_before = Pt(12)
 p_ch.paragraph_format.space_after = Pt(4)
-r_ch = p_ch.add_run("School of Electronics Engineering\n")
+r_ch = p_ch.add_run("School of Computer Science and Engineering\n")
 r_ch.font.name = "Times New Roman"
 r_ch.font.size = Pt(14)
 r_ch.font.bold = True
@@ -460,32 +483,34 @@ r_ct.font.color.rgb = COLOR_BLACK
 
 add_body_p(
     doc,
-    "This is to certify that the project report titled \"DESIGN AND IMPLEMENTATION OF AN INTERNET-ENABLED ACOUSTIC LEVITATION MANIPULATION SYSTEM USING ESP32 APB CLOCK SYNCHRONIZATION AND DUAL PUSH-PULL TRANSDUCER ARRAYS\" submitted by RONIL (24BCE1330), TEJAS (24BCE1360), PRIYANSHU (24BCE1140), and PRASHANT (24BCE1118) to Vellore Institute of Technology, Chennai, in partial fulfilment of the requirement for the award of the degree of Bachelor of Technology in Electronics and Communication Engineering is a bonafide work carried out under my supervision. The project report fulfils the requirements as per the regulations of this University and, in my opinion, meets the necessary standards for submission. The contents of this report have not been submitted and will not be submitted either in part or in full, for the award of any other degree or diploma and the same is certified.",
+    "This is to certify that the project report titled \"DESIGN AND IMPLEMENTATION OF AN INTERNET-ENABLED ACOUSTIC LEVITATION MANIPULATION SYSTEM USING ESP32 APB CLOCK SYNCHRONIZATION AND DUAL PUSH-PULL TRANSDUCER ARRAYS\" submitted by RONIL (24BCE1330), TEJAS (24BCE1360), PRIYANSHU (24BCE1140), and PRASHANT (24BCE1118) to Vellore Institute of Technology, Chennai, in partial fulfilment of the requirement for the award of the degree of Bachelor of Technology in Computer Science and Engineering is a bonafide work carried out under my supervision. The project report fulfils the requirements as per the regulations of this University and, in my opinion, meets the necessary standards for submission. The contents of this report have not been submitted and will not be submitted either in part or in full, for the award of any other degree or diploma and the same is certified.",
     justify=True
 )
 
-doc.add_paragraph().paragraph_format.space_after = Pt(20)
+doc.add_paragraph().paragraph_format.space_after = Pt(16)
 
-# Exact Table 0 from Template (Clean, unbordered 2-column signature layout)
-tbl_t0 = doc.add_table(rows=9, cols=2)
+# Exact Table 0 from Template (Official SCOPE Leadership Sign-offs)
+t0_content = [
+    ("Supervisor (Project Guide)", "Head of the School / Dean"),
+    ("Signature: ․․․․․․․․․․․․․․․․․․․․․․", "Signature: ․․․․․․․․․․․․․․․․․․․․․․"),
+    ("Name: Dr. Mohammed Aarif K.O.", "Name: Dr. Viswanathan V"),
+    ("Designation: Professor, SCOPE", "Designation: Professor & Dean, SCOPE"),
+    ("Date: 02-11-2026", "Date: 02-11-2026"),
+    ("", ""),
+    ("Associate Dean", "Examiner"),
+    ("Signature: ․․․․․․․․․․․․․․․․․․․․․․", "Signature: ․․․․․․․․․․․․․․․․․․․․․․"),
+    ("Name: Dr. Suganya G", "Name: ․․․․․․․․․․․․․․․․․․․․․․"),
+    ("Designation: Professor & Associate Dean, SCOPE", "Designation: ․․․․․․․․․․․․․․․․․․․․․․"),
+    ("Date: 02-11-2026", "Date: ․․․․․․․․․․․․․․․․․․․․․․")
+]
+
+tbl_t0 = doc.add_table(rows=len(t0_content), cols=2)
 tbl_t0.alignment = WD_TABLE_ALIGNMENT.CENTER
 for row in tbl_t0.rows:
     row.cells[0].width = Inches(3.2)
     row.cells[1].width = Inches(3.2)
     for c in row.cells:
-        set_cell_margins(c, top=40, bottom=40, left=40, right=40)
-
-t0_content = [
-    ("Supervisor", "Head of the Department"),
-    ("Signature: ․․․․․․․․․․․․․․․․․․․․․․", "Signature: ․․․․․․․․․․․․․․․․․․․․․․"),
-    ("Name:       ․․․․․․․․․․․․․․․․․․․․․․", "Name:       ․․․․․․․․․․․․․․․․․․․․․․"),
-    ("Date:       ․․․․․․․․․․․․․․․․․․․․․․", "Date:       ․․․․․․․․․․․․․․․․․․․․․․"),
-    ("", ""),
-    ("Examiner 1", "Examiner 2"),
-    ("Signature: ․․․․․․․․․․․․․․․․․․․․․․", "Signature: ․․․․․․․․․․․․․․․․․․․․․․"),
-    ("Name:       ․․․․․․․․․․․․․․․․․․․․․․", "Name:       ․․․․․․․․․․․․․․․․․․․․․․"),
-    ("Date:       ․․․․․․․․․․․․․․․․․․․․․․", "Date:       ․․․․․․․․․․․․․․․․․․․․․․")
-]
+        set_cell_margins(c, top=35, bottom=35, left=40, right=40)
 
 for r_idx, (left_txt, right_txt) in enumerate(t0_content):
     c0 = tbl_t0.rows[r_idx].cells[0]
@@ -496,9 +521,9 @@ for r_idx, (left_txt, right_txt) in enumerate(t0_content):
     p0.paragraph_format.space_after = Pt(0)
     r0 = p0.add_run(left_txt)
     r0.font.name = "Times New Roman"
-    r0.font.size = Pt(11)
+    r0.font.size = Pt(10.5)
     r0.font.color.rgb = COLOR_BLACK
-    if r_idx in [0, 5]:
+    if r_idx in [0, 6]:
         r0.font.bold = True
         
     p1 = c1.paragraphs[0]
@@ -506,9 +531,9 @@ for r_idx, (left_txt, right_txt) in enumerate(t0_content):
     p1.paragraph_format.space_after = Pt(0)
     r1 = p1.add_run(right_txt)
     r1.font.name = "Times New Roman"
-    r1.font.size = Pt(11)
+    r1.font.size = Pt(10.5)
     r1.font.color.rgb = COLOR_BLACK
-    if r_idx in [0, 5]:
+    if r_idx in [0, 6]:
         r1.font.bold = True
 
 # Hide Table 0 borders
@@ -527,7 +552,7 @@ tblPr.append(borders)
 
 p_seal = doc.add_paragraph()
 p_seal.alignment = WD_ALIGN_PARAGRAPH.CENTER
-p_seal.paragraph_format.space_before = Pt(28)
+p_seal.paragraph_format.space_before = Pt(20)
 p_seal.paragraph_format.space_after = Pt(0)
 r_seal = p_seal.add_run("(Seal of the School)")
 r_seal.font.name = "Times New Roman"
@@ -603,22 +628,22 @@ r_ack.font.color.rgb = COLOR_BLACK
 
 add_body_p(
     doc,
-    "We wish to express our sincere thanks and deep sense of gratitude to our project guide and coordinator, Professor, School of Electronics Engineering (SENSE), for his/her consistent encouragement, technical discernment, and valuable guidance offered to us in a pleasant manner throughout the course of the project work, particularly in optimizing high-speed ESP32 timer registers and resolving thermal dissipation bottlenecks."
+    "We wish to express our sincere thanks and deep sense of gratitude to our project guide, Dr. Mohammed Aarif K.O., Professor, School of Computer Science and Engineering (SCOPE), for his consistent encouragement, technical discernment, and valuable guidance offered to us in a pleasant manner throughout the course of the project work, particularly in embedded software architecture, APB timer synchronization, and real-time IoT integration."
 )
 
 add_body_p(
     doc,
-    "We sincerely express our gratitude to Dr. Ravi Sankar A, Dean, SENSE; Dr. Mohanaprasad K, Associate Dean (Academics), SENSE; and Dr. Chitra K, Associate Dean (Research), SENSE, for providing the necessary laboratory facilities, academic infrastructure, and for their constant encouragement and support throughout our project."
+    "We sincerely express our profound gratitude to Dr. Viswanathan V, Professor and Dean, School of Computer Science and Engineering (SCOPE), and Dr. Suganya G, Professor and Associate Dean, School of Computer Science and Engineering (SCOPE), for providing the necessary computing and hardware laboratory facilities, academic infrastructure, and for their constant encouragement and administrative support throughout our project."
 )
 
 add_body_p(
     doc,
-    "We also extend our heartfelt thanks to Dr. Jagannath M, Head of the Department, for his continuous guidance, administrative support, and valuable suggestions during the course of this project."
+    "We also extend our heartfelt thanks to the faculty and leadership of the School of Computer Science and Engineering (SCOPE) for their continuous guidance, academic support, and constructive suggestions during the course of this project."
 )
 
 add_body_p(
     doc,
-    "We also take this opportunity to thank all the faculty members of the School of Electronics Engineering for their support and for the wisdom imparted to us throughout the academic curriculum."
+    "We also take this opportunity to thank all the faculty members of the School of Computer Science and Engineering for their support and for the wisdom imparted to us throughout the academic curriculum."
 )
 
 add_body_p(
@@ -1824,30 +1849,34 @@ students_bio = [
     {
         "name": "RONIL",
         "reg": "24BCE1330",
+        "degree": "Bachelor of Technology in Computer Science and Engineering",
         "mobile": "+91 98765 43210",
         "email": "ronil.24bce1330@vitstudent.ac.in",
-        "addr": "School of Electronics Engineering, Vellore Institute of Technology, Chennai, Vandalur - Kelambakkam Road, Chennai – 600127, India"
+        "addr": "School of Computer Science and Engineering (SCOPE), Vellore Institute of Technology, Chennai, Vandalur - Kelambakkam Road, Chennai – 600127, India"
     },
     {
         "name": "TEJAS",
         "reg": "24BCE1360",
+        "degree": "Bachelor of Technology in Computer Science and Engineering",
         "mobile": "+91 98765 43211",
         "email": "tejas.24bce1360@vitstudent.ac.in",
-        "addr": "School of Electronics Engineering, Vellore Institute of Technology, Chennai, Vandalur - Kelambakkam Road, Chennai – 600127, India"
+        "addr": "School of Computer Science and Engineering (SCOPE), Vellore Institute of Technology, Chennai, Vandalur - Kelambakkam Road, Chennai – 600127, India"
     },
     {
         "name": "PRIYANSHU",
         "reg": "24BCE1140",
+        "degree": "Bachelor of Technology in Computer Science and Engineering",
         "mobile": "+91 98765 43212",
         "email": "priyanshu.24bce1140@vitstudent.ac.in",
-        "addr": "School of Electronics Engineering, Vellore Institute of Technology, Chennai, Vandalur - Kelambakkam Road, Chennai – 600127, India"
+        "addr": "School of Computer Science and Engineering (SCOPE), Vellore Institute of Technology, Chennai, Vandalur - Kelambakkam Road, Chennai – 600127, India"
     },
     {
         "name": "PRASHANT",
         "reg": "24BCE1118",
+        "degree": "Bachelor of Technology in Computer Science and Engineering",
         "mobile": "+91 98765 43213",
         "email": "prashant.24bce1118@vitstudent.ac.in",
-        "addr": "School of Electronics Engineering, Vellore Institute of Technology, Chennai, Vandalur - Kelambakkam Road, Chennai – 600127, India"
+        "addr": "School of Computer Science and Engineering (SCOPE), Vellore Institute of Technology, Chennai, Vandalur - Kelambakkam Road, Chennai – 600127, India"
     }
 ]
 
@@ -1868,6 +1897,7 @@ for s in students_bio:
     
     lines = [
         ("Name: ", s["name"] + f" ({s['reg']})\n"),
+        ("Degree: ", s["degree"] + "\n"),
         ("Mobile No.: ", s["mobile"] + "\n"),
         ("E-mail: ", s["email"] + "\n"),
         ("Permanent Address: ", s["addr"] + "\n")

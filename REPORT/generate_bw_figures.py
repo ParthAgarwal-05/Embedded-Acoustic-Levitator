@@ -471,3 +471,4 @@ fig.savefig(os.path.join(out_dir, "fig4_3_thermal_power_profile.png"), dpi=300)
 plt.close(fig)
 
 print("All 10 figures successfully generated in 100% black and white / grayscale!")
+
