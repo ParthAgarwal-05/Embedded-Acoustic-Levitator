@@ -1173,3 +1173,4 @@ for title, desc in conclusions:
 print(f"Saving presentation to {output_path}...")
 prs.save(output_path)
 print("Technical Details Presentation successfully created!")
+
