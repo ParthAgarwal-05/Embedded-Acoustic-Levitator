@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Full Academic Project Report Builder for Acoustic Levitator
+Full Academic Project Report Builder for Acoustic Levitator - Monochrome & Official Template Formatting
+Adheres strictly to VIT B.Tech ECE Thesis Template V2.
 Outputs:
 1. /Users/parth-agarwal/Desktop/EMBEDDED/project/REPORT/Acoustic_Levitation_Project_Report.docx
 2. /Users/parth-agarwal/Desktop/EMBEDDED/project/REPORT/Acoustic_Levitation_Project_Report.pdf
@@ -10,7 +11,7 @@ import os
 import sys
 import docx
 from docx.shared import Inches, Pt, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT, WD_TAB_LEADER
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
 from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import nsdecls, qn
@@ -20,10 +21,10 @@ fig_dir = os.path.join(report_dir, "figures")
 media_dir = os.path.join(report_dir, "template_media/word/media")
 docx_path = os.path.join(report_dir, "Acoustic_Levitation_Project_Report.docx")
 pdf_path = os.path.join(report_dir, "Acoustic_Levitation_Project_Report.pdf")
-schematic_path = os.path.join(report_dir, "schematic.png")
-logo_path = os.path.join(media_dir, "image1.png")
+schematic_path = os.path.join(report_dir, "schematic_bw.png")
+logo_path = os.path.join(media_dir, "image1_bw.png")
 
-# Document initialization
+# Initialize Document
 doc = docx.Document()
 
 # Set standard margins: Top 1.0", Bottom 1.0", Left 1.25", Right 1.0"
@@ -35,14 +36,12 @@ for section in doc.sections:
     section.page_width = Inches(8.27)  # A4
     section.page_height = Inches(11.69)
 
-# Colors
-COLOR_NAVY = RGBColor(15, 23, 42)
-COLOR_MUTED = RGBColor(71, 85, 105)
-COLOR_BLUE = RGBColor(30, 58, 138)
-COLOR_TEXT = RGBColor(0, 0, 0)
+# Strictly Black and White Colors
+COLOR_BLACK = RGBColor(0, 0, 0)
+COLOR_DARK_GRAY = RGBColor(60, 60, 60)
 
-# Helper functions
-def set_cell_margins(cell, top=100, bottom=100, left=150, right=150):
+# Helper functions for styling
+def set_cell_margins(cell, top=80, bottom=80, left=120, right=120):
     tcPr = cell._tc.get_or_add_tcPr()
     tcMar = OxmlElement('w:tcMar')
     for m, val in [('top', top), ('bottom', bottom), ('left', left), ('right', right)]:
@@ -56,10 +55,12 @@ def set_cell_background(cell, fill_hex):
     shading_elm = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{fill_hex}"/>')
     cell._tc.get_or_add_tcPr().append(shading_elm)
 
-def style_table_header(row, col_widths=None):
-    for i, cell in enumerate(row.cells):
-        set_cell_background(cell, "1E3A8A")
-        set_cell_margins(cell, top=120, bottom=120, left=150, right=150)
+def style_academic_table(table, header_fill="EAEAEA", alt_fill=None):
+    # Style Header
+    header_row = table.rows[0]
+    for cell in header_row.cells:
+        set_cell_background(cell, header_fill)
+        set_cell_margins(cell, top=100, bottom=100, left=120, right=120)
         cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
         for p in cell.paragraphs:
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -69,14 +70,14 @@ def style_table_header(row, col_widths=None):
                 r.font.name = "Times New Roman"
                 r.font.size = Pt(10)
                 r.font.bold = True
-                r.font.color.rgb = RGBColor(255, 255, 255)
+                r.font.color.rgb = COLOR_BLACK
 
-def format_table_cells(table, col_widths=None, alt_color="F8FAFC"):
+    # Style Body Cells
     for row_idx, row in enumerate(table.rows[1:]):
-        bg = alt_color if row_idx % 2 == 1 else "FFFFFF"
-        for col_idx, cell in enumerate(row.cells):
+        bg = alt_fill if (alt_fill and row_idx % 2 == 1) else "FFFFFF"
+        for cell in row.cells:
             set_cell_background(cell, bg)
-            set_cell_margins(cell, top=100, bottom=100, left=140, right=140)
+            set_cell_margins(cell, top=80, bottom=80, left=120, right=120)
             cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
             for p in cell.paragraphs:
                 p.paragraph_format.space_before = Pt(0)
@@ -85,14 +86,15 @@ def format_table_cells(table, col_widths=None, alt_color="F8FAFC"):
                 for r in p.runs:
                     r.font.name = "Times New Roman"
                     r.font.size = Pt(9.5)
-    
-    # Apply cell borders
+                    r.font.color.rgb = COLOR_BLACK
+
+    # Apply Academic Table Borders (Top rule, Bottom of header rule, Bottom of table rule)
     tblPr = table._tbl.tblPr
     borders = parse_xml(
         f'<w:tblBorders {nsdecls("w")}>\n'
-        f'  <w:top w:val="single" w:sz="6" w:space="0" w:color="CBD5E1"/>\n'
-        f'  <w:bottom w:val="single" w:sz="6" w:space="0" w:color="CBD5E1"/>\n'
-        f'  <w:insideH w:val="single" w:sz="4" w:space="0" w:color="E2E8F0"/>\n'
+        f'  <w:top w:val="single" w:sz="12" w:space="0" w:color="000000"/>\n'
+        f'  <w:bottom w:val="single" w:sz="12" w:space="0" w:color="000000"/>\n'
+        f'  <w:insideH w:val="single" w:sz="4" w:space="0" w:color="CCCCCC"/>\n'
         f'  <w:insideV w:val="none"/>\n'
         f'  <w:left w:val="none"/>\n'
         f'  <w:right w:val="none"/>\n'
@@ -100,16 +102,16 @@ def format_table_cells(table, col_widths=None, alt_color="F8FAFC"):
     )
     tblPr.append(borders)
 
-def add_callout(doc, text, title="NOTE / ENGINEERING RULE:"):
+def add_callout_bw(doc, text, title="CRITICAL ENGINEERING PRINCIPLE:"):
     tbl = doc.add_table(rows=1, cols=1)
     tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
     cell = tbl.cell(0, 0)
-    set_cell_background(cell, "F1F5F9")
-    set_cell_margins(cell, top=120, bottom=120, left=180, right=180)
+    set_cell_background(cell, "F5F5F5")
+    set_cell_margins(cell, top=100, bottom=100, left=160, right=160)
     
     borders = parse_xml(
         f'<w:tcBorders {nsdecls("w")}>\n'
-        f'  <w:left w:val="single" w:sz="24" w:space="0" w:color="0284C7"/>\n'
+        f'  <w:left w:val="single" w:sz="24" w:space="0" w:color="000000"/>\n'
         f'  <w:top w:val="none"/>\n'
         f'  <w:right w:val="none"/>\n'
         f'  <w:bottom w:val="none"/>\n'
@@ -125,13 +127,13 @@ def add_callout(doc, text, title="NOTE / ENGINEERING RULE:"):
     r_t.font.name = "Times New Roman"
     r_t.font.size = Pt(10)
     r_t.font.bold = True
-    r_t.font.color.rgb = RGBColor(2, 132, 199)
+    r_t.font.color.rgb = COLOR_BLACK
     
     r_b = p.add_run(text)
     r_b.font.name = "Times New Roman"
     r_b.font.size = Pt(10)
     r_b.font.italic = True
-    r_b.font.color.rgb = RGBColor(30, 41, 59)
+    r_b.font.color.rgb = COLOR_BLACK
     doc.add_paragraph().paragraph_format.space_after = Pt(4)
 
 def add_body_p(doc, text, bold_prefix="", space_after=6, italic=False, justify=True):
@@ -146,12 +148,12 @@ def add_body_p(doc, text, bold_prefix="", space_after=6, italic=False, justify=T
         r_pre.font.name = "Times New Roman"
         r_pre.font.size = Pt(12)
         r_pre.font.bold = True
-        r_pre.font.color.rgb = COLOR_TEXT
+        r_pre.font.color.rgb = COLOR_BLACK
     r = p.add_run(text)
     r.font.name = "Times New Roman"
     r.font.size = Pt(12)
     r.font.italic = italic
-    r.font.color.rgb = COLOR_TEXT
+    r.font.color.rgb = COLOR_BLACK
     return p
 
 def add_caption(doc, text):
@@ -163,7 +165,7 @@ def add_caption(doc, text):
     r.font.name = "Times New Roman"
     r.font.size = Pt(10.5)
     r.font.bold = True
-    r.font.color.rgb = COLOR_NAVY
+    r.font.color.rgb = COLOR_BLACK
     return p
 
 def add_figure(doc, img_path, caption_text, width=Inches(5.8)):
@@ -178,43 +180,53 @@ def add_figure(doc, img_path, caption_text, width=Inches(5.8)):
     else:
         print(f"Warning: image path {img_path} not found.")
 
+def add_chapter_header(doc, chapter_num, chapter_title):
+    p_num = doc.add_paragraph()
+    p_num.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_num.paragraph_format.space_before = Pt(16)
+    p_num.paragraph_format.space_after = Pt(4)
+    p_num.paragraph_format.keep_with_next = True
+    r_n = p_num.add_run(f"CHAPTER {chapter_num}")
+    r_n.font.name = "Times New Roman"
+    r_n.font.size = Pt(16)
+    r_n.font.bold = True
+    r_n.font.color.rgb = COLOR_BLACK
+
+    p_tit = doc.add_paragraph()
+    p_tit.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_tit.paragraph_format.space_before = Pt(0)
+    p_tit.paragraph_format.space_after = Pt(18)
+    p_tit.paragraph_format.keep_with_next = True
+    r_t = p_tit.add_run(chapter_title)
+    r_t.font.name = "Times New Roman"
+    r_t.font.size = Pt(16)
+    r_t.font.bold = True
+    r_t.font.color.rgb = COLOR_BLACK
+
 def add_heading_1(doc, text):
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    p.paragraph_format.space_before = Pt(18)
-    p.paragraph_format.space_after = Pt(8)
+    p.paragraph_format.space_before = Pt(16)
+    p.paragraph_format.space_after = Pt(6)
     p.paragraph_format.keep_with_next = True
     r = p.add_run(text)
     r.font.name = "Times New Roman"
-    r.font.size = Pt(15)
+    r.font.size = Pt(14)
     r.font.bold = True
-    r.font.color.rgb = COLOR_BLUE
+    r.font.color.rgb = COLOR_BLACK
     return p
 
 def add_heading_2(doc, text):
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    p.paragraph_format.space_before = Pt(14)
-    p.paragraph_format.space_after = Pt(6)
-    p.paragraph_format.keep_with_next = True
-    r = p.add_run(text)
-    r.font.name = "Times New Roman"
-    r.font.size = Pt(13)
-    r.font.bold = True
-    r.font.color.rgb = COLOR_NAVY
-    return p
-
-def add_heading_3(doc, text):
-    p = doc.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    p.paragraph_format.space_before = Pt(10)
+    p.paragraph_format.space_before = Pt(12)
     p.paragraph_format.space_after = Pt(4)
     p.paragraph_format.keep_with_next = True
     r = p.add_run(text)
     r.font.name = "Times New Roman"
-    r.font.size = Pt(11.5)
+    r.font.size = Pt(12)
     r.font.bold = True
-    r.font.color.rgb = COLOR_MUTED
+    r.font.color.rgb = COLOR_BLACK
     return p
 
 def add_equation_box(doc, eq_text, eq_number):
@@ -222,8 +234,10 @@ def add_equation_box(doc, eq_text, eq_number):
     tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
     cell_eq = tbl.cell(0, 0)
     cell_num = tbl.cell(0, 1)
-    set_cell_margins(cell_eq, top=60, bottom=60, left=100, right=100)
-    set_cell_margins(cell_num, top=60, bottom=60, left=100, right=100)
+    cell_eq.width = Inches(5.2)
+    cell_num.width = Inches(1.0)
+    set_cell_margins(cell_eq, top=40, bottom=40, left=40, right=40)
+    set_cell_margins(cell_num, top=40, bottom=40, left=40, right=40)
     
     p_eq = cell_eq.paragraphs[0]
     p_eq.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -231,6 +245,7 @@ def add_equation_box(doc, eq_text, eq_number):
     r_eq.font.name = "Times New Roman"
     r_eq.font.size = Pt(11.5)
     r_eq.font.italic = True
+    r_eq.font.color.rgb = COLOR_BLACK
     
     p_num = cell_num.paragraphs[0]
     p_num.alignment = WD_ALIGN_PARAGRAPH.RIGHT
@@ -238,6 +253,7 @@ def add_equation_box(doc, eq_text, eq_number):
     r_num.font.name = "Times New Roman"
     r_num.font.size = Pt(11.5)
     r_num.font.bold = True
+    r_num.font.color.rgb = COLOR_BLACK
     
     # Hide borders
     tblPr = tbl._tbl.tblPr
@@ -252,29 +268,44 @@ def add_equation_box(doc, eq_text, eq_number):
         f'</w:tblBorders>'
     )
     tblPr.append(borders)
-    doc.add_paragraph().paragraph_format.space_after = Pt(4)
+    doc.add_paragraph().paragraph_format.space_after = Pt(2)
 
-print("Starting document creation...")
+def add_toc_line(doc, title, page_str, bold=False, indent=0):
+    p = doc.add_paragraph()
+    p.paragraph_format.line_spacing = 1.15
+    p.paragraph_format.space_before = Pt(0)
+    p.paragraph_format.space_after = Pt(2)
+    if indent > 0:
+        p.paragraph_format.left_indent = Inches(indent)
+    p.paragraph_format.tab_stops.add_tab_stop(Inches(6.0), WD_TAB_ALIGNMENT.RIGHT, WD_TAB_LEADER.DOTS)
+    
+    r = p.add_run(f"{title}\t{page_str}")
+    r.font.name = "Times New Roman"
+    r.font.size = Pt(10.5)
+    r.font.bold = bold
+    r.font.color.rgb = COLOR_BLACK
+
+print("Starting Black & White / Officially Formatted Document Builder...")
 
 # ==========================================
-# 1. COVER PAGE
+# 1. COVER PAGE (Matching Template)
 # ==========================================
 print("Writing Cover Page...")
 
-# Logo
+# Grayscale VIT Logo
 if os.path.exists(logo_path):
     p_logo = doc.add_paragraph()
     p_logo.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_logo.paragraph_format.space_before = Pt(10)
-    p_logo.paragraph_format.space_after = Pt(16)
+    p_logo.paragraph_format.space_after = Pt(20)
     r_logo = p_logo.add_run()
     r_logo.add_picture(logo_path, width=Inches(3.8))
 
 # Title
 p_title = doc.add_paragraph()
 p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-p_title.paragraph_format.space_before = Pt(10)
-p_title.paragraph_format.space_after = Pt(16)
+p_title.paragraph_format.space_before = Pt(12)
+p_title.paragraph_format.space_after = Pt(24)
 r_title = p_title.add_run(
     "DESIGN AND IMPLEMENTATION OF AN INTERNET-ENABLED ACOUSTIC LEVITATION "
     "MANIPULATION SYSTEM USING ESP32 APB CLOCK SYNCHRONIZATION AND "
@@ -283,100 +314,72 @@ r_title = p_title.add_run(
 r_title.font.name = "Times New Roman"
 r_title.font.size = Pt(15)
 r_title.font.bold = True
-r_title.font.color.rgb = COLOR_NAVY
+r_title.font.color.rgb = COLOR_BLACK
 
-# Subtitle
+# Template Subtitle Block
 p_sub = doc.add_paragraph()
 p_sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
-p_sub.paragraph_format.space_after = Pt(4)
-r_sub1 = p_sub.add_run("A project report submitted in partial fulfilment\n")
-r_sub2 = p_sub.add_run("of the requirements for the degree of\n\n")
-r_sub3 = p_sub.add_run("Bachelor of Technology\n")
-r_sub4 = p_sub.add_run("in\n")
-r_sub5 = p_sub.add_run("Electronics and Communication Engineering\n\n")
-r_sub6 = p_sub.add_run("by\n")
-for r in [r_sub1, r_sub2, r_sub4, r_sub6]:
-    r.font.name = "Times New Roman"
-    r.font.size = Pt(12)
-    r.font.italic = True
-for r in [r_sub3, r_sub5]:
-    r.font.name = "Times New Roman"
-    r.font.size = Pt(13)
-    r.font.bold = True
+p_sub.paragraph_format.space_after = Pt(6)
 
-# Student Table on Cover Page
-tbl_cov = doc.add_table(rows=5, cols=2)
-tbl_cov.alignment = WD_TABLE_ALIGNMENT.CENTER
-cov_data = [
-    ("Name of Student", "Registration Number"),
+runs_sub = [
+    ("A project report submitted in partial fulfilment\n", False, 12),
+    ("of the requirements for the degree of\n\n", False, 12),
+    ("Bachelor of Technology\n", True, 14),
+    ("in\n", False, 12),
+    ("Electronics and Communication Engineering\n\n", True, 14),
+    ("by\n\n", False, 12)
+]
+for text, is_bold, sz in runs_sub:
+    r = p_sub.add_run(text)
+    r.font.name = "Times New Roman"
+    r.font.size = Pt(sz)
+    r.font.bold = is_bold
+    r.font.color.rgb = COLOR_BLACK
+
+# Students List (Centered, cleanly formatted text, NO ugly table)
+p_stud = doc.add_paragraph()
+p_stud.alignment = WD_ALIGN_PARAGRAPH.CENTER
+p_stud.paragraph_format.line_spacing = 1.3
+p_stud.paragraph_format.space_after = Pt(36)
+
+stud_list = [
     ("RONIL", "24BCE1330"),
     ("TEJAS", "24BCE1360"),
     ("PRIYANSHU", "24BCE1140"),
-    ("PRASHANT", "24BCE1118"),
+    ("PRASHANT", "24BCE1118")
 ]
-for r_i, row in enumerate(tbl_cov.rows):
-    cell_n = row.cells[0]
-    cell_r = row.cells[1]
-    cell_n.width = Inches(2.6)
-    cell_r.width = Inches(2.2)
-    set_cell_margins(cell_n, top=40, bottom=40, left=100, right=100)
-    set_cell_margins(cell_r, top=40, bottom=40, left=100, right=100)
-    
-    p_n = cell_n.paragraphs[0]
-    p_n.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    r_n = p_n.add_run(cov_data[r_i][0])
-    r_n.font.name = "Times New Roman"
-    r_n.font.size = Pt(11.5)
-    if r_i == 0:
-        r_n.font.bold = True
-        set_cell_background(cell_n, "F1F5F9")
-    
-    p_r = cell_r.paragraphs[0]
-    p_r.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r_r = p_r.add_run(cov_data[r_i][1])
-    r_r.font.name = "Times New Roman"
-    r_r.font.size = Pt(11.5)
-    if r_i == 0:
-        r_r.font.bold = True
-        set_cell_background(cell_r, "F1F5F9")
+for s_name, s_reg in stud_list:
+    r = p_stud.add_run(f"{s_name} ({s_reg})\n")
+    r.font.name = "Times New Roman"
+    r.font.size = Pt(12)
+    r.font.bold = True
+    r.font.color.rgb = COLOR_BLACK
 
-# Cover borders
-tblPr = tbl_cov._tbl.tblPr
-borders = parse_xml(
-    f'<w:tblBorders {nsdecls("w")}>\n'
-    f'  <w:top w:val="single" w:sz="6" w:space="0" w:color="94A3B8"/>\n'
-    f'  <w:bottom w:val="single" w:sz="6" w:space="0" w:color="94A3B8"/>\n'
-    f'  <w:insideH w:val="single" w:sz="4" w:space="0" w:color="CBD5E1"/>\n'
-    f'  <w:insideV w:val="none"/>\n'
-    f'  <w:left w:val="none"/>\n'
-    f'  <w:right w:val="none"/>\n'
-    f'</w:tblBorders>'
-)
-tblPr.append(borders)
-
-# Institution Footer
+# Institution Block (Matching template)
 p_inst = doc.add_paragraph()
 p_inst.alignment = WD_ALIGN_PARAGRAPH.CENTER
-p_inst.paragraph_format.space_before = Pt(28)
+p_inst.paragraph_format.space_before = Pt(20)
 p_inst.paragraph_format.space_after = Pt(0)
-r_i1 = p_inst.add_run("School of Electronics Engineering\n")
-r_i1.font.bold = True
-r_i1.font.size = Pt(13)
-r_i2 = p_inst.add_run("Vellore Institute of Technology, Chennai\n")
-r_i2.font.bold = True
-r_i2.font.size = Pt(13)
-r_i3 = p_inst.add_run("Vandalur - Kelambakkam Road, Chennai – 600127, India\n\n")
-r_i3.font.size = Pt(11)
-r_i4 = p_inst.add_run("NOVEMBER 2026")
-r_i4.font.bold = True
-r_i4.font.size = Pt(12)
-for r in [r_i1, r_i2, r_i3, r_i4]:
+p_inst.paragraph_format.line_spacing = 1.2
+
+inst_runs = [
+    ("School of Electronics Engineering\n", True, 14),
+    ("Vellore Institute of Technology, Chennai\n", True, 14),
+    ("Vandalur - Kelambakkam Road\n", False, 12),
+    ("Chennai – 600127, India\n\n", False, 12),
+    ("November 2026", True, 12)
+]
+for text, is_bold, sz in inst_runs:
+    r = p_inst.add_run(text)
     r.font.name = "Times New Roman"
+    r.font.size = Pt(sz)
+    r.font.bold = is_bold
+    r.font.color.rgb = COLOR_BLACK
 
 doc.add_page_break()
 
 # ==========================================
-# 2. DECLARATION
+# 2. DECLARATION (Matching Template)
 # ==========================================
 print("Writing Declaration...")
 
@@ -386,107 +389,53 @@ p_dh.paragraph_format.space_before = Pt(12)
 p_dh.paragraph_format.space_after = Pt(4)
 r_dh = p_dh.add_run("School of Electronics Engineering\n")
 r_dh.font.name = "Times New Roman"
-r_dh.font.size = Pt(13)
+r_dh.font.size = Pt(14)
 r_dh.font.bold = True
+r_dh.font.color.rgb = COLOR_BLACK
 
 p_dt = doc.add_paragraph()
 p_dt.alignment = WD_ALIGN_PARAGRAPH.CENTER
 p_dt.paragraph_format.space_after = Pt(20)
-r_dt = p_dt.add_run("DECLARATION")
+r_dt = p_dt.add_run("Declaration")
 r_dt.font.name = "Times New Roman"
-r_dt.font.size = Pt(15)
+r_dt.font.size = Pt(16)
 r_dt.font.bold = True
-r_dt.font.color.rgb = COLOR_NAVY
+r_dt.font.color.rgb = COLOR_BLACK
 
 add_body_p(
     doc,
-    "We hereby declare that the project report titled \"DESIGN AND IMPLEMENTATION OF AN INTERNET-ENABLED ACOUSTIC LEVITATION MANIPULATION SYSTEM USING ESP32 APB CLOCK SYNCHRONIZATION AND DUAL PUSH-PULL TRANSDUCER ARRAYS\" submitted by us to the School of Electronics Engineering, Vellore Institute of Technology, Chennai, in partial fulfilment of the requirements for the award of the degree of Bachelor of Technology in Electronics and Communication Engineering is a record of bona fide research work carried out by us under the supervision and guidance of our project coordinator.",
+    "We hereby declare that the report titled \"DESIGN AND IMPLEMENTATION OF AN INTERNET-ENABLED ACOUSTIC LEVITATION MANIPULATION SYSTEM USING ESP32 APB CLOCK SYNCHRONIZATION AND DUAL PUSH-PULL TRANSDUCER ARRAYS\" submitted by us to the School of Electronics Engineering, Vellore Institute of Technology, Chennai, in partial fulfilment of the requirements for the award of Bachelor of Technology in Electronics and Communication Engineering, is a bonafide record of the work carried out by us under the supervision of our Project Coordinator.",
     justify=True
 )
 
 add_body_p(
     doc,
-    "We further declare that the work reported in this report has not been submitted and will not be submitted, either in part or in full, for the award of any other degree or diploma in this or any other Institute or University. The experimental data, mathematical calculations, schematics, and embedded source code presented herein are original and authenticated.",
+    "We further declare that the work reported in this report has not been submitted and will not be submitted, either in part or in full, for the award of any other degree or diploma of this institute or of any other institute or University.",
     justify=True
 )
 
-doc.add_paragraph().paragraph_format.space_after = Pt(12)
+doc.add_paragraph().paragraph_format.space_after = Pt(16)
 
-# Signatures Table
-tbl_sig = doc.add_table(rows=5, cols=3)
-tbl_sig.alignment = WD_TABLE_ALIGNMENT.CENTER
-sig_headers = ["Name of the Student", "Registration Number", "Signature with Date"]
-for c_i, h in enumerate(sig_headers):
-    cell = tbl_sig.cell(0, c_i)
-    set_cell_background(cell, "F1F5F9")
-    set_cell_margins(cell, top=60, bottom=60, left=80, right=80)
-    p = cell.paragraphs[0]
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = p.add_run(h)
-    r.font.name = "Times New Roman"
-    r.font.size = Pt(10.5)
-    r.font.bold = True
-
-students = [
-    ("RONIL", "24BCE1330"),
-    ("TEJAS", "24BCE1360"),
-    ("PRIYANSHU", "24BCE1140"),
-    ("PRASHANT", "24BCE1118")
-]
-
-for s_i, (s_name, s_reg) in enumerate(students):
-    row = tbl_sig.rows[s_i + 1]
-    cell_name = row.cells[0]
-    cell_reg = row.cells[1]
-    cell_sign = row.cells[2]
+# Signatures for all 4 students (Matching Template)
+for s_name, s_reg in stud_list:
+    p_sig = doc.add_paragraph()
+    p_sig.paragraph_format.line_spacing = 1.2
+    p_sig.paragraph_format.space_before = Pt(4)
+    p_sig.paragraph_format.space_after = Pt(10)
     
-    for c in [cell_name, cell_reg, cell_sign]:
-        set_cell_margins(c, top=80, bottom=80, left=80, right=80)
-    
-    p_n = cell_name.paragraphs[0]
-    p_n.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    r_n = p_n.add_run(s_name)
-    r_n.font.name = "Times New Roman"
-    r_n.font.size = Pt(10)
-    r_n.font.bold = True
-    
-    p_r = cell_reg.paragraphs[0]
-    p_r.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r_r = p_r.add_run(s_reg)
-    r_r.font.name = "Times New Roman"
-    r_r.font.size = Pt(10)
-    
-    p_s = cell_sign.paragraphs[0]
-    p_s.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r_s = p_s.add_run("_____________________\nDate: 02/11/2026")
-    r_s.font.name = "Times New Roman"
-    r_s.font.size = Pt(9.5)
-
-tblPr = tbl_sig._tbl.tblPr
-borders = parse_xml(
-    f'<w:tblBorders {nsdecls("w")}>\n'
-    f'  <w:top w:val="single" w:sz="6" w:space="0" w:color="94A3B8"/>\n'
-    f'  <w:bottom w:val="single" w:sz="6" w:space="0" w:color="94A3B8"/>\n'
-    f'  <w:insideH w:val="single" w:sz="4" w:space="0" w:color="CBD5E1"/>\n'
-    f'  <w:insideV w:val="single" w:sz="4" w:space="0" w:color="CBD5E1"/>\n'
-    f'  <w:left w:val="none"/>\n'
-    f'  <w:right w:val="none"/>\n'
-    f'</w:tblBorders>'
-)
-tblPr.append(borders)
-
-p_place = doc.add_paragraph()
-p_place.paragraph_format.space_before = Pt(16)
-p_place.paragraph_format.space_after = Pt(0)
-r_pl = p_place.add_run("Place: Chennai\nDate: 02-11-2026")
-r_pl.font.name = "Times New Roman"
-r_pl.font.size = Pt(11)
-r_pl.font.italic = True
+    r1 = p_sig.add_run("Signature of the Student: ____________________________________\n")
+    r2 = p_sig.add_run(f"Name and Reg. No.: {s_name} ({s_reg})\n")
+    r3 = p_sig.add_run("Date: 02-11-2026\n")
+    for r in [r1, r2, r3]:
+        r.font.name = "Times New Roman"
+        r.font.size = Pt(11)
+        r.font.color.rgb = COLOR_BLACK
+    r2.font.bold = True
 
 doc.add_page_break()
 
 # ==========================================
-# 3. CERTIFICATE
+# 3. CERTIFICATE (Matching Template Table 0)
 # ==========================================
 print("Writing Certificate...")
 
@@ -496,58 +445,74 @@ p_ch.paragraph_format.space_before = Pt(12)
 p_ch.paragraph_format.space_after = Pt(4)
 r_ch = p_ch.add_run("School of Electronics Engineering\n")
 r_ch.font.name = "Times New Roman"
-r_ch.font.size = Pt(13)
+r_ch.font.size = Pt(14)
 r_ch.font.bold = True
+r_ch.font.color.rgb = COLOR_BLACK
 
 p_ct = doc.add_paragraph()
 p_ct.alignment = WD_ALIGN_PARAGRAPH.CENTER
 p_ct.paragraph_format.space_after = Pt(20)
-r_ct = p_ct.add_run("CERTIFICATE")
+r_ct = p_ct.add_run("Certificate")
 r_ct.font.name = "Times New Roman"
-r_ct.font.size = Pt(15)
+r_ct.font.size = Pt(16)
 r_ct.font.bold = True
-r_ct.font.color.rgb = COLOR_NAVY
+r_ct.font.color.rgb = COLOR_BLACK
 
 add_body_p(
     doc,
-    "This is to certify that the project report titled \"DESIGN AND IMPLEMENTATION OF AN INTERNET-ENABLED ACOUSTIC LEVITATION MANIPULATION SYSTEM USING ESP32 APB CLOCK SYNCHRONIZATION AND DUAL PUSH-PULL TRANSDUCER ARRAYS\" submitted by RONIL (24BCE1330), TEJAS (24BCE1360), PRIYANSHU (24BCE1140), and PRASHANT (24BCE1118) to Vellore Institute of Technology, Chennai, for the award of the degree of Bachelor of Technology in Electronics and Communication Engineering is a bona fide record of the project work carried out under my supervision and guidance.",
+    "This is to certify that the project report titled \"DESIGN AND IMPLEMENTATION OF AN INTERNET-ENABLED ACOUSTIC LEVITATION MANIPULATION SYSTEM USING ESP32 APB CLOCK SYNCHRONIZATION AND DUAL PUSH-PULL TRANSDUCER ARRAYS\" submitted by RONIL (24BCE1330), TEJAS (24BCE1360), PRIYANSHU (24BCE1140), and PRASHANT (24BCE1118) to Vellore Institute of Technology, Chennai, in partial fulfilment of the requirement for the award of the degree of Bachelor of Technology in Electronics and Communication Engineering is a bonafide work carried out under my supervision. The project report fulfils the requirements as per the regulations of this University and, in my opinion, meets the necessary standards for submission. The contents of this report have not been submitted and will not be submitted either in part or in full, for the award of any other degree or diploma and the same is certified.",
     justify=True
 )
 
-add_body_p(
-    doc,
-    "The engineering designs, acoustic potential derivations, hardware schematics, and experimental validation benchmarks submitted herein are an original compilation of engineering effort. To the best of my knowledge, the matter embodied in this report has not been submitted for the award of any other degree or diploma elsewhere.",
-    justify=True
-)
+doc.add_paragraph().paragraph_format.space_after = Pt(20)
 
-doc.add_paragraph().paragraph_format.space_after = Pt(40)
+# Exact Table 0 from Template (Clean, unbordered 2-column signature layout)
+tbl_t0 = doc.add_table(rows=9, cols=2)
+tbl_t0.alignment = WD_TABLE_ALIGNMENT.CENTER
+for row in tbl_t0.rows:
+    row.cells[0].width = Inches(3.2)
+    row.cells[1].width = Inches(3.2)
+    for c in row.cells:
+        set_cell_margins(c, top=40, bottom=40, left=40, right=40)
 
-# Certificate Signature Block
-tbl_cert = doc.add_table(rows=2, cols=2)
-tbl_cert.alignment = WD_TABLE_ALIGNMENT.CENTER
-for row in tbl_cert.rows:
-    for cell in row.cells:
-        cell.width = Inches(3.2)
-        set_cell_margins(cell, top=60, bottom=60, left=40, right=40)
+t0_content = [
+    ("Supervisor", "Head of the Department"),
+    ("Signature: ․․․․․․․․․․․․․․․․․․․․․․", "Signature: ․․․․․․․․․․․․․․․․․․․․․․"),
+    ("Name:       ․․․․․․․․․․․․․․․․․․․․․․", "Name:       ․․․․․․․․․․․․․․․․․․․․․․"),
+    ("Date:       ․․․․․․․․․․․․․․․․․․․․․․", "Date:       ․․․․․․․․․․․․․․․․․․․․․․"),
+    ("", ""),
+    ("Examiner 1", "Examiner 2"),
+    ("Signature: ․․․․․․․․․․․․․․․․․․․․․․", "Signature: ․․․․․․․․․․․․․․․․․․․․․․"),
+    ("Name:       ․․․․․․․․․․․․․․․․․․․․․․", "Name:       ․․․․․․․․․․․․․․․․․․․․․․"),
+    ("Date:       ․․․․․․․․․․․․․․․․․․․․․․", "Date:       ․․․․․․․․․․․․․․․․․․․․․․")
+]
 
-p_g = tbl_cert.cell(0, 0).paragraphs[0]
-p_g.add_run("Guide / Project Coordinator\n___________________________\nSchool of Electronics Engineering\nVIT Chennai").font.name = "Times New Roman"
+for r_idx, (left_txt, right_txt) in enumerate(t0_content):
+    c0 = tbl_t0.rows[r_idx].cells[0]
+    c1 = tbl_t0.rows[r_idx].cells[1]
+    
+    p0 = c0.paragraphs[0]
+    p0.paragraph_format.space_before = Pt(0)
+    p0.paragraph_format.space_after = Pt(0)
+    r0 = p0.add_run(left_txt)
+    r0.font.name = "Times New Roman"
+    r0.font.size = Pt(11)
+    r0.font.color.rgb = COLOR_BLACK
+    if r_idx in [0, 5]:
+        r0.font.bold = True
+        
+    p1 = c1.paragraphs[0]
+    p1.paragraph_format.space_before = Pt(0)
+    p1.paragraph_format.space_after = Pt(0)
+    r1 = p1.add_run(right_txt)
+    r1.font.name = "Times New Roman"
+    r1.font.size = Pt(11)
+    r1.font.color.rgb = COLOR_BLACK
+    if r_idx in [0, 5]:
+        r1.font.bold = True
 
-p_d = tbl_cert.cell(0, 1).paragraphs[0]
-p_d.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-p_d.add_run("Dean / Head of School\n___________________________\nSchool of Electronics Engineering\nVIT Chennai").font.name = "Times New Roman"
-
-p_ie = tbl_cert.cell(1, 0).paragraphs[0]
-p_ie.paragraph_format.space_before = Pt(30)
-p_ie.add_run("Internal Examiner\n___________________________").font.name = "Times New Roman"
-
-p_ee = tbl_cert.cell(1, 1).paragraphs[0]
-p_ee.paragraph_format.space_before = Pt(30)
-p_ee.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-p_ee.add_run("External Examiner\n___________________________").font.name = "Times New Roman"
-
-# Hide borders
-tblPr = tbl_cert._tbl.tblPr
+# Hide Table 0 borders
+tblPr = tbl_t0._tbl.tblPr
 borders = parse_xml(
     f'<w:tblBorders {nsdecls("w")}>\n'
     f'  <w:top w:val="none"/>\n'
@@ -560,22 +525,32 @@ borders = parse_xml(
 )
 tblPr.append(borders)
 
+p_seal = doc.add_paragraph()
+p_seal.alignment = WD_ALIGN_PARAGRAPH.CENTER
+p_seal.paragraph_format.space_before = Pt(28)
+p_seal.paragraph_format.space_after = Pt(0)
+r_seal = p_seal.add_run("(Seal of the School)")
+r_seal.font.name = "Times New Roman"
+r_seal.font.size = Pt(11)
+r_seal.font.italic = True
+r_seal.font.color.rgb = COLOR_BLACK
+
 doc.add_page_break()
 
 # ==========================================
-# 4. ABSTRACT
+# 4. ABSTRACT (Matching Template)
 # ==========================================
 print("Writing Abstract...")
 
 p_ah = doc.add_paragraph()
 p_ah.alignment = WD_ALIGN_PARAGRAPH.CENTER
 p_ah.paragraph_format.space_before = Pt(12)
-p_ah.paragraph_format.space_after = Pt(16)
-r_ah = p_ah.add_run("ABSTRACT")
+p_ah.paragraph_format.space_after = Pt(18)
+r_ah = p_ah.add_run("Abstract")
 r_ah.font.name = "Times New Roman"
-r_ah.font.size = Pt(15)
+r_ah.font.size = Pt(16)
 r_ah.font.bold = True
-r_ah.font.color.rgb = COLOR_NAVY
+r_ah.font.color.rgb = COLOR_BLACK
 
 add_body_p(
     doc,
@@ -599,399 +574,349 @@ r_kw_title = p_kw.add_run("Keywords: ")
 r_kw_title.font.name = "Times New Roman"
 r_kw_title.font.size = Pt(11)
 r_kw_title.font.bold = True
+r_kw_title.font.color.rgb = COLOR_BLACK
 r_kw_body = p_kw.add_run(
-    "Acoustic Levitation; Gor'kov Potential; ESP32; APB Clock Synchronization; "
-    "Push-Pull H-Bridge; Piezoelectric Transducers; Standing Wave Field; IoT Manipulation; Microfluidics."
+    "Acoustic Levitation, Gor'kov Potential, ESP32, APB Clock Synchronization, "
+    "Push-Pull H-Bridge, Piezoelectric Transducers, Standing Wave Field, IoT Manipulation, Microfluidics."
 )
 r_kw_body.font.name = "Times New Roman"
 r_kw_body.font.size = Pt(11)
 r_kw_body.font.italic = True
+r_kw_body.font.color.rgb = COLOR_BLACK
 
 doc.add_page_break()
 
 # ==========================================
-# 5. ACKNOWLEDGEMENTS
+# 5. ACKNOWLEDGEMENTS (Matching Template)
 # ==========================================
 print("Writing Acknowledgements...")
 
 p_ack = doc.add_paragraph()
 p_ack.alignment = WD_ALIGN_PARAGRAPH.CENTER
 p_ack.paragraph_format.space_before = Pt(12)
-p_ack.paragraph_format.space_after = Pt(16)
-r_ack = p_ack.add_run("ACKNOWLEDGEMENTS")
+p_ack.paragraph_format.space_after = Pt(18)
+r_ack = p_ack.add_run("Acknowledgements")
 r_ack.font.name = "Times New Roman"
-r_ack.font.size = Pt(15)
+r_ack.font.size = Pt(16)
 r_ack.font.bold = True
-r_ack.font.color.rgb = COLOR_NAVY
+r_ack.font.color.rgb = COLOR_BLACK
 
 add_body_p(
     doc,
-    "First and foremost, we express our profound gratitude to the Management of Vellore Institute of Technology (VIT), Chennai, for providing exemplary academic infrastructure, well-equipped laboratory facilities, and a research-conducive environment that enabled the successful completion of this project."
+    "We wish to express our sincere thanks and deep sense of gratitude to our project guide and coordinator, Professor, School of Electronics Engineering (SENSE), for his/her consistent encouragement, technical discernment, and valuable guidance offered to us in a pleasant manner throughout the course of the project work, particularly in optimizing high-speed ESP32 timer registers and resolving thermal dissipation bottlenecks."
 )
 
 add_body_p(
     doc,
-    "We extend our heartfelt appreciation and sincere respect to the Dean and Faculty members of the School of Electronics Engineering (SENSE) for their continuous administrative support, technical guidance, and valuable constructive critiques throughout the design, simulation, and experimental prototyping stages of our thesis."
+    "We sincerely express our gratitude to Dr. Ravi Sankar A, Dean, SENSE; Dr. Mohanaprasad K, Associate Dean (Academics), SENSE; and Dr. Chitra K, Associate Dean (Research), SENSE, for providing the necessary laboratory facilities, academic infrastructure, and for their constant encouragement and support throughout our project."
 )
 
 add_body_p(
     doc,
-    "We convey our deepest gratitude to our Project Guide and Coordinator for their constant mentorship, technical discernment, and insightful recommendations, particularly in fine-tuning the Gor'kov potential equations, optimizing high-speed ESP32 timer registers, and resolving thermal dissipation bottlenecks during H-bridge power driver integration."
+    "We also extend our heartfelt thanks to Dr. Jagannath M, Head of the Department, for his continuous guidance, administrative support, and valuable suggestions during the course of this project."
 )
 
 add_body_p(
     doc,
-    "Our sincere thanks are also due to the technical and laboratory staff of the Embedded Systems and RF/Acoustics Laboratories for granting access to digital storage oscilloscopes, decibel sound meters, and precision multimeter test benches. Finally, we thank our parents and peers whose constant encouragement, patience, and motivation sustained us through every demanding milestone of this research endeavour."
+    "We also take this opportunity to thank all the faculty members of the School of Electronics Engineering for their support and for the wisdom imparted to us throughout the academic curriculum."
+)
+
+add_body_p(
+    doc,
+    "We thank our parents, family, and friends for bearing with us throughout the course of our project and for the opportunity they provided us in undergoing this course in such a prestigious institution."
 )
 
 doc.add_page_break()
 
 # ==========================================
-# 6. CODES AND STANDARDS
+# 6. CODES AND STANDARDS (Matching Template)
 # ==========================================
 print("Writing Codes and Standards...")
 
 p_cs = doc.add_paragraph()
 p_cs.alignment = WD_ALIGN_PARAGRAPH.CENTER
 p_cs.paragraph_format.space_before = Pt(12)
-p_cs.paragraph_format.space_after = Pt(16)
-r_cs = p_cs.add_run("CODES AND STANDARDS")
+p_cs.paragraph_format.space_after = Pt(18)
+r_cs = p_cs.add_run("Codes and Standards")
 r_cs.font.name = "Times New Roman"
-r_cs.font.size = Pt(15)
+r_cs.font.size = Pt(16)
 r_cs.font.bold = True
-r_cs.font.color.rgb = COLOR_NAVY
+r_cs.font.color.rgb = COLOR_BLACK
 
-add_body_p(
-    doc,
-    "The engineering design, experimental setup, circuit integration, and wireless control firmware developed in this research project strictly conform to international electrotechnical, acoustic, communication, and environmental safety standards, as detailed below:"
-)
+p_cst = doc.add_paragraph()
+p_cst.paragraph_format.space_after = Pt(10)
+r_cst = p_cst.add_run("Project Title: DESIGN AND IMPLEMENTATION OF AN INTERNET-ENABLED ACOUSTIC LEVITATION MANIPULATION SYSTEM USING ESP32 APB CLOCK SYNCHRONIZATION AND DUAL PUSH-PULL TRANSDUCER ARRAYS")
+r_cst.font.name = "Times New Roman"
+r_cst.font.size = Pt(11)
+r_cst.font.bold = True
+r_cst.font.color.rgb = COLOR_BLACK
 
-tbl_cs = doc.add_table(rows=8, cols=3)
-tbl_cs.alignment = WD_TABLE_ALIGNMENT.CENTER
-cs_headers = ["Domain", "Standard / Code Identifier", "Scope and Relevance to Acoustic Levitator"]
-for c_i, h in enumerate(cs_headers):
-    tbl_cs.cell(0, c_i).paragraphs[0].text = h
-style_table_header(tbl_cs.rows[0])
-
-cs_records = [
-    ("Acoustic & Biomedical Safety", "IEC 60601-2-37", "Governs acoustic exposure safety limits, thermal index (TI), and mechanical index (MI) to ensure ultrasonic emissions at 40 kHz remain harmless to human operators."),
-    ("Smart Transducer Interfaces", "IEEE 1451.4", "Defines transducer electronic data sheet (TEDS) architecture and standardized mixed-mode interface protocols for piezoelectric ultrasound sensors and actuators."),
-    ("Enclosure & IP Ingress Protection", "IEC 60529 (IP54)", "Ensures the 3D-printed acoustic cavity housing and PCB driver enclosures are protected against dust ingress and liquid droplet splashing during microfluidic manipulation."),
-    ("Wireless IoT Communication", "IEEE 802.11 b/g/n", "Standard for 2.4 GHz industrial wireless local area networks, governing the ESP32 Wi-Fi interface, channel isolation, and reliable TCP/IP packet transmission."),
-    ("Electrical Safety & Insulation", "IEC 62368-1 / IEC 60364", "Specifies product electrical safety requirements, hazard-based safety engineering, and insulation coordination for low-voltage dual H-bridge switching circuits powered by 12 V DC."),
-    ("PCB Design & Dielectric Clearance", "IPC-2221", "Generic standard on printed board design, establishing minimum trace spacing and creepage distances to prevent electrical arcing under 24 Vpp push-pull inductive switching."),
-    ("Software Architecture Quality", "ISO/IEC 25010", "Governs systems and software quality models, evaluating responsiveness, reliability, error handling, and latency of embedded HTTP RESTful web services.")
+cs_data_template = [
+    ("1. Acoustic & Biomedical Safety Standards", [
+        ("IEC 60601-2-37 – Acoustic Output Measurement and Safety",
+         "Ensures ultrasonic emissions at 40 kHz are within safe exposure limits, acoustic mechanical index (MI), and thermal index (TI) for human operators.")
+    ]),
+    ("2. Sensor & Transducer Standards", [
+        ("IEEE 1451.4 – Smart Transducer Interface Protocols",
+         "Standard for integrating piezoelectric ultrasound transducers with embedded microcontrollers and transducer electronic data sheets (TEDS).")
+    ]),
+    ("3. Communication & IoT Standards", [
+        ("IEEE 802.11 – Wi-Fi Communication",
+         "For transmitting real-time manipulation commands and diagnostic telemetry over 2.4 GHz local networks to web clients."),
+        ("MQTT Protocol (ISO/IEC 20922)",
+         "Lightweight messaging protocol for wireless telemetry and remote actuator state updates.")
+    ]),
+    ("4. Embedded Systems & Electrical Safety", [
+        ("IEC 62368-1 – Electrical Safety for ICT Equipment",
+         "Specifies electrical insulation and hazard protection for low-voltage dual H-bridge switching circuits powered by 12 V DC."),
+        ("IPC-2221 – Generic Standard on Printed Board Design",
+         "Governs minimum trace clearance and dielectric creepage distances under 24 Vpp push-pull inductive switching transients."),
+        ("ISO/IEC 25010 – Systems and Software Quality Models",
+         "Evaluates responsiveness, error tolerance, and latency of embedded HTTP RESTful web services.")
+    ]),
+    ("5. Enclosure & Environmental Ingress Standards", [
+        ("IEC 60529 – Ingress Protection (IP54)",
+         "Ensures the 3D-printed acoustic cavity housing and PCB driver enclosures are protected against dust ingress and liquid droplet splashing during microfluidic manipulation.")
+    ])
 ]
 
-for r_i, rec in enumerate(cs_records):
-    row = tbl_cs.rows[r_i + 1]
-    row.cells[0].paragraphs[0].text = rec[0]
-    row.cells[1].paragraphs[0].text = rec[1]
-    row.cells[2].paragraphs[0].text = rec[2]
-
-format_table_cells(tbl_cs)
-doc.add_paragraph().paragraph_format.space_after = Pt(8)
+for sec_title, std_items in cs_data_template:
+    p_s = doc.add_paragraph()
+    p_s.paragraph_format.space_before = Pt(8)
+    p_s.paragraph_format.space_after = Pt(2)
+    p_s.paragraph_format.keep_with_next = True
+    r_s = p_s.add_run(sec_title)
+    r_s.font.name = "Times New Roman"
+    r_s.font.size = Pt(11)
+    r_s.font.bold = True
+    r_s.font.color.rgb = COLOR_BLACK
+    
+    for std_name, std_desc in std_items:
+        p_name = doc.add_paragraph()
+        p_name.paragraph_format.left_indent = Inches(0.25)
+        p_name.paragraph_format.space_before = Pt(2)
+        p_name.paragraph_format.space_after = Pt(1)
+        p_name.paragraph_format.keep_with_next = True
+        r_n = p_name.add_run(f"•  {std_name}")
+        r_n.font.name = "Times New Roman"
+        r_n.font.size = Pt(10.5)
+        r_n.font.bold = True
+        r_n.font.color.rgb = COLOR_BLACK
+        
+        p_desc = doc.add_paragraph()
+        p_desc.paragraph_format.left_indent = Inches(0.4)
+        p_desc.paragraph_format.space_before = Pt(0)
+        p_desc.paragraph_format.space_after = Pt(4)
+        r_d = p_desc.add_run(std_desc)
+        r_d.font.name = "Times New Roman"
+        r_d.font.size = Pt(10)
+        r_d.font.color.rgb = COLOR_BLACK
 
 doc.add_page_break()
 
 # ==========================================
-# 7. MAPPING OF SDGs
+# 7. MAPPING OF SDGs (Matching Template Table 1)
 # ==========================================
-print("Writing SDGs Mapping...")
+print("Writing Mapping of SDGs...")
 
 p_sdg = doc.add_paragraph()
 p_sdg.alignment = WD_ALIGN_PARAGRAPH.CENTER
 p_sdg.paragraph_format.space_before = Pt(12)
-p_sdg.paragraph_format.space_after = Pt(16)
-r_sdg = p_sdg.add_run("MAPPING OF SUSTAINABLE DEVELOPMENT GOALS (SDGs)")
+p_sdg.paragraph_format.space_after = Pt(18)
+r_sdg = p_sdg.add_run("Mapping of Sustainable Development Goals (SDGs)")
 r_sdg.font.name = "Times New Roman"
-r_sdg.font.size = Pt(15)
+r_sdg.font.size = Pt(16)
 r_sdg.font.bold = True
-r_sdg.font.color.rgb = COLOR_NAVY
+r_sdg.font.color.rgb = COLOR_BLACK
 
-add_body_p(
-    doc,
-    "The United Nations Sustainable Development Goals (SDGs) define a shared global blueprint for peace, prosperity, and technological progress. The internet-enabled acoustic levitator developed in this thesis directly contributes to multiple target goals through innovative contactless material processing, clean microfluidic manipulation, and low-power embedded electronics:"
-)
+p_sdg_sub = doc.add_paragraph()
+p_sdg_sub.paragraph_format.space_after = Pt(10)
+r_sdg_sub = p_sdg_sub.add_run("Please refer to the compliance matrix below:")
+r_sdg_sub.font.name = "Times New Roman"
+r_sdg_sub.font.size = Pt(11)
+r_sdg_sub.font.italic = True
+r_sdg_sub.font.color.rgb = COLOR_BLACK
 
-tbl_sdg = doc.add_table(rows=4, cols=3)
-tbl_sdg.alignment = WD_TABLE_ALIGNMENT.CENTER
-sdg_headers = ["SDG Goal & Icon", "Specific UN Target", "Direct Contribution of Proposed Acoustic Levitator"]
-for c_i, h in enumerate(sdg_headers):
-    tbl_sdg.cell(0, c_i).paragraphs[0].text = h
-style_table_header(tbl_sdg.rows[0])
+# Exact Table 1 from template: 4 columns
+tbl_t1 = doc.add_table(rows=4, cols=4)
+tbl_t1.alignment = WD_TABLE_ALIGNMENT.CENTER
+t1_headers = ["Project Title", "Mapped SDGs", "Justification", "Example Impact"]
+for c_idx, h in enumerate(t1_headers):
+    tbl_t1.cell(0, c_idx).paragraphs[0].text = h
 
-sdg_records = [
+t1_records = [
     (
-        "SDG 3: Good Health and Well-being",
-        "Target 3.b & 3.d:\nSupport research and development of vaccines and medicines; strengthen early warning and risk reduction for hazardous biological handling.",
-        "Enables containerless handling of biological cells, blood droplets, protein crystals, and hazardous pharmaceuticals without solid surface contact. This eliminates sample contamination from petri dishes, prevents bio-adhesion losses, and enables clean in-air biochemical assays."
+        "Acoustic Levitation Manipulation System",
+        "SDG 3 – Good Health and Well-being",
+        "Enables containerless handling of living biological cells, protein crystals, and pharmaceutical reagents without solid surface contact.",
+        "Prevents sample contamination, eliminates bio-adhesion losses, and enables clean in-air biomedical assays."
     ),
     (
-        "SDG 9: Industry, Innovation, and Infrastructure",
-        "Target 9.4 & 9.5:\nUpgrade technological capabilities of industrial sectors; foster innovation and substantially increase R&D access.",
-        "Replaces bulky, expensive laboratory levitation apparatus (costing upwards of $5,000) with a low-cost (~$25), portable, IoT-connected embedded system. Democratizes access to advanced acoustic micromanufacturing, frictionless micro-assembly, and containerless material sintering."
+        "Acoustic Levitation Manipulation System",
+        "SDG 9 – Industry, Innovation and Infrastructure",
+        "Replaces bulky $5,000+ laboratory setups with a $28 embedded IoT system driven by ESP32 APB timer synchronization.",
+        "Democratizes access to advanced acoustic micromanufacturing and contactless micro-assembly in educational institutions."
     ),
     (
-        "SDG 12: Responsible Consumption and Production",
-        "Target 12.4 & 12.5:\nAchieve environmentally sound management of chemicals and significantly reduce waste generation through prevention and reduction.",
-        "Eliminates the consumption of single-use disposable plastic pipette tips, microtubes, and chemical reagent vials during microscopic fluidic titration. Contactless levitation enables zero-waste surface droplet evaporation and residue-free chemical crystallization."
+        "Acoustic Levitation Manipulation System",
+        "SDG 12 – Responsible Consumption and Production",
+        "Eliminates the consumption of single-use disposable plastic pipette tips and reagent vials during microscopic fluidic titration.",
+        "Reduces laboratory plastic waste and eliminates reagent loss during microscopic chemical crystallization."
     )
 ]
 
-for r_i, rec in enumerate(sdg_records):
-    row = tbl_sdg.rows[r_i + 1]
-    row.cells[0].paragraphs[0].text = rec[0]
-    row.cells[1].paragraphs[0].text = rec[1]
-    row.cells[2].paragraphs[0].text = rec[2]
+for r_idx, rec in enumerate(t1_records):
+    row = tbl_t1.rows[r_idx + 1]
+    for c_idx, val in enumerate(rec):
+        row.cells[c_idx].paragraphs[0].text = val
 
-format_table_cells(tbl_sdg)
-doc.add_paragraph().paragraph_format.space_after = Pt(8)
+style_academic_table(tbl_t1, header_fill="EAEAEA")
+doc.add_paragraph().paragraph_format.space_after = Pt(12)
 
 doc.add_page_break()
 
 # ==========================================
-# 8. CONTENTS, LIST OF FIGURES, TABLES, ACRONYMS
+# 8. CONTENTS (Matching Template with Dot Leaders)
 # ==========================================
-print("Writing TOC and Lists...")
+print("Writing Table of Contents...")
 
-# Table of Contents
 p_th = doc.add_paragraph()
 p_th.alignment = WD_ALIGN_PARAGRAPH.CENTER
 p_th.paragraph_format.space_before = Pt(12)
-p_th.paragraph_format.space_after = Pt(16)
-r_th = p_th.add_run("CONTENTS")
+p_th.paragraph_format.space_after = Pt(18)
+r_th = p_th.add_run("Contents")
 r_th.font.name = "Times New Roman"
-r_th.font.size = Pt(15)
+r_th.font.size = Pt(16)
 r_th.font.bold = True
-r_th.font.color.rgb = COLOR_NAVY
+r_th.font.color.rgb = COLOR_BLACK
 
 toc_items = [
-    ("Declaration", "i"),
-    ("Certificate", "ii"),
-    ("Abstract", "iii"),
-    ("Acknowledgements", "iv"),
-    ("Codes and Standards", "v"),
-    ("Mapping of Sustainable Development Goals (SDGs)", "vi"),
-    ("List of Figures", "viii"),
-    ("List of Tables", "ix"),
-    ("List of Acronyms", "x"),
-    ("CHAPTER 1: INTRODUCTION", "1"),
-    ("  1.1 Background and Motivation", "1"),
-    ("  1.2 Theoretical Foundations of Acoustic Radiation Force", "2"),
-    ("  1.3 Problem Statement & Current Limitations", "3"),
-    ("  1.4 Objectives of the Research Project", "4"),
-    ("  1.5 Organization of the Thesis", "5"),
-    ("CHAPTER 2: LITERATURE SURVEY & ACOUSTIC PHYSICS", "6"),
-    ("  2.1 Historical Evolution of Acoustic Levitation", "6"),
-    ("  2.2 Physics of Acoustic Standing Waves and Radiation Pressure", "7"),
-    ("  2.3 Derivation of the Gor'kov Acoustic Potential", "9"),
-    ("  2.4 Resonant Dynamics of 40 kHz Piezoelectric Transducers", "12"),
-    ("  2.5 Critical Analysis and Gaps Identified in Prior Works", "14"),
-    ("CHAPTER 3: METHODOLOGY AND SYSTEM DESIGN", "16"),
-    ("  3.1 Overall System Architecture", "16"),
-    ("  3.2 ESP32 APB Clock Synchronization & Hardware LEDC Timers", "18"),
-    ("  3.3 Dual L293D Push-Pull Driver Network (24 Vpp Differential Drive)", "20"),
-    ("  3.4 6-Transducer Acoustic Cavity Geometry and Resonance", "23"),
-    ("  3.5 Master Pinout and Interconnection Matrix", "26"),
-    ("  3.6 Embedded Firmware & IoT REST Control Engine", "28"),
-    ("CHAPTER 4: RESULTS AND DISCUSSION", "31"),
-    ("  4.1 Sound Pressure Level (SPL) and Resonance Tuning", "31"),
-    ("  4.2 Particle Trapping Stability and Vertical Phase Translation", "33"),
-    ("  4.3 Thermal Profiling and Electrical Power Dissipation", "36"),
-    ("  4.4 Web Interface Responsiveness and Latency Analysis", "38"),
-    ("  4.5 Comparative Performance Benchmark", "40"),
-    ("CHAPTER 5: CONCLUSION AND FUTURE SCOPE", "42"),
-    ("  5.1 Concluding Remarks and Summary of Contributions", "42"),
-    ("  5.2 Practical Advantages and Scalability", "43"),
-    ("  5.3 Future Research Enhancements", "44"),
-    ("APPENDIX 1: Complete ESP32 Firmware Source Code (project.ino)", "45"),
-    ("APPENDIX 2: Master Hardware Pinout and Wiring Reference", "52"),
-    ("BIBLIOGRAPHY", "54"),
-    ("BIODATA OF INVESTIGATORS", "57"),
+    ("Declaration", "i", True, 0),
+    ("Certificate", "ii", True, 0),
+    ("Abstract", "iii", True, 0),
+    ("Acknowledgements", "iv", True, 0),
+    ("Codes and Standards", "v", True, 0),
+    ("Mapping of Sustainable Development Goals (SDGs)", "vi", True, 0),
+    ("List of Figures", "viii", True, 0),
+    ("List of Tables", "ix", True, 0),
+    ("List of Acronyms", "x", True, 0),
+    ("1   Introduction", "1", True, 0),
+    ("    1.1   Background and Motivation", "1", False, 0.2),
+    ("    1.2   Theoretical Foundations of Acoustic Radiation Force", "2", False, 0.2),
+    ("    1.3   Problem Statement & Current Limitations", "3", False, 0.2),
+    ("    1.4   Objectives of the Research Project", "4", False, 0.2),
+    ("    1.5   Organization of the Thesis", "4", False, 0.2),
+    ("2   Literature Survey & Acoustic Physics", "5", True, 0),
+    ("    2.1   Historical Evolution of Acoustic Levitation", "5", False, 0.2),
+    ("    2.2   Physics of Acoustic Standing Waves and Radiation Pressure", "5", False, 0.2),
+    ("    2.3   Derivation of the Gor'kov Acoustic Potential", "6", False, 0.2),
+    ("    2.4   Resonant Dynamics of 40 kHz Piezoelectric Transducers", "9", False, 0.2),
+    ("    2.5   Critical Analysis and Gaps Identified in Prior Works", "9", False, 0.2),
+    ("3   Methodology and System Design", "10", True, 0),
+    ("    3.1   Overall System Architecture", "10", False, 0.2),
+    ("    3.2   ESP32 APB Clock Synchronization & Hardware LEDC Timers", "11", False, 0.2),
+    ("    3.3   Dual L293D Push-Pull Driver Network (24 Vpp Differential Drive)", "11", False, 0.2),
+    ("    3.4   6-Transducer Acoustic Cavity Geometry and Resonance", "13", False, 0.2),
+    ("    3.5   Master Pinout and Interconnection Matrix", "14", False, 0.2),
+    ("    3.6   Embedded Firmware & IoT REST Control Engine", "16", False, 0.2),
+    ("4   Results and Discussion", "18", True, 0),
+    ("    4.1   Sound Pressure Level (SPL) and Resonance Tuning", "18", False, 0.2),
+    ("    4.2   Particle Trapping Stability and Vertical Phase Translation", "19", False, 0.2),
+    ("    4.3   Thermal Profiling and Electrical Power Dissipation", "20", False, 0.2),
+    ("    4.4   Web Interface Responsiveness and Latency Analysis", "21", False, 0.2),
+    ("    4.5   Comparative Performance Benchmark", "21", False, 0.2),
+    ("5   Conclusion and Future Scope", "23", True, 0),
+    ("    5.1   Concluding Remarks and Summary of Contributions", "23", False, 0.2),
+    ("    5.2   Practical Advantages and Scalability", "23", False, 0.2),
+    ("    5.3   Future Research Enhancements", "24", False, 0.2),
+    ("Appendix 1: Complete ESP32 Firmware Source Code (project.ino)", "25", True, 0),
+    ("Appendix 2: Master Hardware Pinout and Wiring Reference Guide", "28", True, 0),
+    ("Bibliography", "30", True, 0),
+    ("Biodata", "31", True, 0)
 ]
 
-tbl_toc = doc.add_table(rows=len(toc_items), cols=2)
-tbl_toc.alignment = WD_TABLE_ALIGNMENT.CENTER
-for r_i, (title, page) in enumerate(toc_items):
-    row = tbl_toc.rows[r_i]
-    c_t = row.cells[0]
-    c_p = row.cells[1]
-    c_t.width = Inches(5.8)
-    c_p.width = Inches(0.8)
-    set_cell_margins(c_t, top=20, bottom=20, left=40, right=40)
-    set_cell_margins(c_p, top=20, bottom=20, left=40, right=40)
-    
-    p1 = c_t.paragraphs[0]
-    p1.paragraph_format.space_before = Pt(0)
-    p1.paragraph_format.space_after = Pt(0)
-    r1 = p1.add_run(title)
-    r1.font.name = "Times New Roman"
-    r1.font.size = Pt(10.5)
-    if "CHAPTER" in title or title in ["Declaration", "Certificate", "Abstract", "Acknowledgements", "Codes and Standards", "Mapping of Sustainable Development Goals (SDGs)", "List of Figures", "List of Tables", "List of Acronyms", "BIBLIOGRAPHY", "BIODATA OF INVESTIGATORS"]:
-        r1.font.bold = True
-    
-    p2 = c_p.paragraphs[0]
-    p2.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    p2.paragraph_format.space_before = Pt(0)
-    p2.paragraph_format.space_after = Pt(0)
-    r2 = p2.add_run(page)
-    r2.font.name = "Times New Roman"
-    r2.font.size = Pt(10.5)
-
-# Hide TOC borders
-tblPr = tbl_toc._tbl.tblPr
-borders = parse_xml(
-    f'<w:tblBorders {nsdecls("w")}>\n'
-    f'  <w:top w:val="none"/>\n'
-    f'  <w:bottom w:val="none"/>\n'
-    f'  <w:insideH w:val="none"/>\n'
-    f'  <w:insideV w:val="none"/>\n'
-    f'  <w:left w:val="none"/>\n'
-    f'  <w:right w:val="none"/>\n'
-    f'</w:tblBorders>'
-)
-tblPr.append(borders)
+for title, page_str, is_b, ind in toc_items:
+    add_toc_line(doc, title, page_str, bold=is_b, indent=ind)
 
 doc.add_page_break()
 
-# List of Figures
+# ==========================================
+# 9. LIST OF FIGURES & TABLES (With Dot Leaders)
+# ==========================================
+print("Writing List of Figures and List of Tables...")
+
 p_lf = doc.add_paragraph()
 p_lf.alignment = WD_ALIGN_PARAGRAPH.CENTER
 p_lf.paragraph_format.space_before = Pt(12)
-p_lf.paragraph_format.space_after = Pt(16)
-r_lf = p_lf.add_run("LIST OF FIGURES")
+p_lf.paragraph_format.space_after = Pt(18)
+r_lf = p_lf.add_run("List of Figures")
 r_lf.font.name = "Times New Roman"
-r_lf.font.size = Pt(15)
+r_lf.font.size = Pt(16)
 r_lf.font.bold = True
-r_lf.font.color.rgb = COLOR_NAVY
+r_lf.font.color.rgb = COLOR_BLACK
 
 fig_items = [
-    ("Figure 1.1", "Physical Concept of Acoustic Levitation, Standing Waves, and Pressure Node Formation", "2"),
-    ("Figure 2.1", "Spatial Acoustic Pressure and Velocity Standing Wave Distribution across the Cavity", "8"),
-    ("Figure 2.2", "Gor'kov Acoustic Potential Well U and Restoring Acoustic Radiation Force Frad", "11"),
-    ("Figure 3.1", "End-to-End System Architecture: ESP32 Core Allocation, Drivers, and 6-TX Array", "17"),
-    ("Figure 3.2", "Physical Cavity Dimensions, Focal Superposition, and Semi-Wavelength Spacing", "24"),
-    ("Figure 3.3", "Complete Electronic Circuit Schematic: ESP32 to Dual L293D and Transducer Rails", "25"),
-    ("Figure 3.4", "ESP32 APB Complementary PWM Drive and 24 Vpp Push-Pull Differential Output Waveforms", "27"),
-    ("Figure 4.1", "Acoustic Sound Pressure Level (SPL) Response across 38 kHz to 42 kHz Frequency Sweep", "32"),
-    ("Figure 4.2", "Stable Particle Levitation Trapping and Vertical Node Position vs. Driving Phase Shift", "35"),
-    ("Figure 4.3", "L293D Motor Driver Thermal Rise Curve and System Power Dissipation Profile", "37"),
+    ("1.1   Physical Principle of Ultrasonic Standing Wave Levitation", "2"),
+    ("2.1   Acoustic Pressure and Particle Velocity Standing Wave Distribution", "6"),
+    ("2.2   Gor'kov Acoustic Potential Well U and Restoring Acoustic Radiation Force", "8"),
+    ("3.1   End-to-End System Architecture: ESP32 Cores, Drivers, and Cavity", "10"),
+    ("3.4   ESP32 APB Complementary PWM Drive and 24 Vpp Differential Waveforms", "12"),
+    ("3.2   Physical Cavity Dimensions, Focal Superposition, and Semi-Wavelength Spacing", "14"),
+    ("3.3   Master Circuit Schematic: ESP32 to Dual L293D and Transducer Rails", "14"),
+    ("4.1   Measured Acoustic SPL Response across 38.0 kHz to 42.0 kHz Frequency Sweep", "18"),
+    ("4.2   Stable Particle Levitation Trapping and Vertical Node Displacement vs. Phase", "20"),
+    ("4.3   L293D Motor Driver Thermal Rise Curve and System Power Dissipation Profile", "20"),
+    ("A2.1  Master Hardware Wiring Layout and Power Decoupling Schematic", "29")
 ]
 
-tbl_figs = doc.add_table(rows=len(fig_items), cols=3)
-tbl_figs.alignment = WD_TABLE_ALIGNMENT.CENTER
-for r_i, (num, cap, pg) in enumerate(fig_items):
-    row = tbl_figs.rows[r_i]
-    c_n, c_c, c_p = row.cells[0], row.cells[1], row.cells[2]
-    c_n.width, c_c.width, c_p.width = Inches(1.2), Inches(4.6), Inches(0.8)
-    set_cell_margins(c_n, top=20, bottom=20, left=30, right=30)
-    set_cell_margins(c_c, top=20, bottom=20, left=30, right=30)
-    set_cell_margins(c_p, top=20, bottom=20, left=30, right=30)
-    
-    p0 = c_n.paragraphs[0]
-    r0 = p0.add_run(num)
-    r0.font.name = "Times New Roman"
-    r0.font.size = Pt(10)
-    r0.font.bold = True
-    
-    p1 = c_c.paragraphs[0]
-    r1 = p1.add_run(cap)
-    r1.font.name = "Times New Roman"
-    r1.font.size = Pt(10)
-    
-    p2 = c_p.paragraphs[0]
-    p2.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    r2 = p2.add_run(pg)
-    r2.font.name = "Times New Roman"
-    r2.font.size = Pt(10)
-
-tblPr = tbl_figs._tbl.tblPr
-borders = parse_xml(
-    f'<w:tblBorders {nsdecls("w")}>\n'
-    f'  <w:top w:val="none"/>\n'
-    f'  <w:bottom w:val="none"/>\n'
-    f'  <w:insideH w:val="none"/>\n'
-    f'  <w:insideV w:val="none"/>\n'
-    f'  <w:left w:val="none"/>\n'
-    f'  <w:right w:val="none"/>\n'
-    f'</w:tblBorders>'
-)
-tblPr.append(borders)
+for title, page_str in fig_items:
+    add_toc_line(doc, title, page_str, bold=False, indent=0)
 
 doc.add_page_break()
 
-# List of Tables
 p_lt = doc.add_paragraph()
 p_lt.alignment = WD_ALIGN_PARAGRAPH.CENTER
 p_lt.paragraph_format.space_before = Pt(12)
-p_lt.paragraph_format.space_after = Pt(16)
-r_lt = p_lt.add_run("LIST OF TABLES")
+p_lt.paragraph_format.space_after = Pt(18)
+r_lt = p_lt.add_run("List of Tables")
 r_lt.font.name = "Times New Roman"
-r_lt.font.size = Pt(15)
+r_lt.font.size = Pt(16)
 r_lt.font.bold = True
-r_lt.font.color.rgb = COLOR_NAVY
+r_lt.font.color.rgb = COLOR_BLACK
 
 tab_items = [
-    ("Table 2.1", "Comparative Evaluation of Prior Acoustic Levitation Architectures vs. Proposed Work", "15"),
-    ("Table 3.1", "Complete Hardware Pinout & Interconnection Matrix (ESP32 -> L293D -> 6 Transducers)", "26"),
-    ("Table 3.2", "System Physical Dimensions, Acoustic Parameters, and Electrical Specifications", "28"),
-    ("Table 4.1", "Measured Acoustic and Electrical Experimental Performance Metrics", "39"),
-    ("Table 4.2", "Comprehensive Performance Benchmark of Proposed System vs. State-of-the-Art Literature", "41"),
+    ("2.1   Comparative Evaluation of Prior Acoustic Levitation Architectures", "9"),
+    ("3.1   Complete Master Hardware Pinout and Interconnection Matrix", "14"),
+    ("3.2   System Physical Dimensions, Acoustic Parameters, and Electrical Specifications", "16"),
+    ("4.1   Measured Acoustic, Mechanical, and Electrical Experimental Metrics", "21"),
+    ("4.2   Comprehensive Benchmark of Proposed System vs. State-of-the-Art Literature", "21")
 ]
 
-tbl_tabs = doc.add_table(rows=len(tab_items), cols=3)
-tbl_tabs.alignment = WD_TABLE_ALIGNMENT.CENTER
-for r_i, (num, cap, pg) in enumerate(tab_items):
-    row = tbl_tabs.rows[r_i]
-    c_n, c_c, c_p = row.cells[0], row.cells[1], row.cells[2]
-    c_n.width, c_c.width, c_p.width = Inches(1.2), Inches(4.6), Inches(0.8)
-    set_cell_margins(c_n, top=20, bottom=20, left=30, right=30)
-    set_cell_margins(c_c, top=20, bottom=20, left=30, right=30)
-    set_cell_margins(c_p, top=20, bottom=20, left=30, right=30)
-    
-    p0 = c_n.paragraphs[0]
-    r0 = p0.add_run(num)
-    r0.font.name = "Times New Roman"
-    r0.font.size = Pt(10)
-    r0.font.bold = True
-    
-    p1 = c_c.paragraphs[0]
-    r1 = p1.add_run(cap)
-    r1.font.name = "Times New Roman"
-    r1.font.size = Pt(10)
-    
-    p2 = c_p.paragraphs[0]
-    p2.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    r2 = p2.add_run(pg)
-    r2.font.name = "Times New Roman"
-    r2.font.size = Pt(10)
-
-tblPr = tbl_tabs._tbl.tblPr
-borders = parse_xml(
-    f'<w:tblBorders {nsdecls("w")}>\n'
-    f'  <w:top w:val="none"/>\n'
-    f'  <w:bottom w:val="none"/>\n'
-    f'  <w:insideH w:val="none"/>\n'
-    f'  <w:insideV w:val="none"/>\n'
-    f'  <w:left w:val="none"/>\n'
-    f'  <w:right w:val="none"/>\n'
-    f'</w:tblBorders>'
-)
-tblPr.append(borders)
+for title, page_str in tab_items:
+    add_toc_line(doc, title, page_str, bold=False, indent=0)
 
 doc.add_page_break()
 
-# List of Acronyms
+# ==========================================
+# 10. LIST OF ACRONYMS (Matching Template Table 2)
+# ==========================================
+print("Writing List of Acronyms...")
+
 p_la = doc.add_paragraph()
 p_la.alignment = WD_ALIGN_PARAGRAPH.CENTER
 p_la.paragraph_format.space_before = Pt(12)
-p_la.paragraph_format.space_after = Pt(16)
-r_la = p_la.add_run("LIST OF ACRONYMS")
+p_la.paragraph_format.space_after = Pt(18)
+r_la = p_la.add_run("List of Acronyms")
 r_la.font.name = "Times New Roman"
-r_la.font.size = Pt(15)
+r_la.font.size = Pt(16)
 r_la.font.bold = True
-r_la.font.color.rgb = COLOR_NAVY
+r_la.font.color.rgb = COLOR_BLACK
+
+tbl_t2 = doc.add_table(rows=21, cols=2)
+tbl_t2.alignment = WD_TABLE_ALIGNMENT.CENTER
+t2_headers = ["Acronym", "Full Form"]
+for c_idx, h in enumerate(t2_headers):
+    tbl_t2.cell(0, c_idx).paragraphs[0].text = h
 
 acronym_items = [
     ("APB", "Advanced Peripheral Bus (ESP32 High-Speed Peripheral Bus at 80 MHz)"),
@@ -1000,84 +925,40 @@ acronym_items = [
     ("DC", "Direct Current"),
     ("DMA", "Direct Memory Access"),
     ("DSO", "Digital Storage Oscilloscope"),
-    ("EMF", "Electromotive Force (Back-EMF from inductive transducer discharge)"),
-    ("EPS", "Expanded Polystyrene (Material used for levitation test particles)"),
+    ("EPS", "Expanded Polystyrene"),
     ("GPIO", "General Purpose Input / Output"),
     ("HTTP", "Hypertext Transfer Protocol"),
     ("IoT", "Internet of Things"),
     ("JSON", "JavaScript Object Notation"),
     ("LEDC", "LED Control (ESP32 Hardware High-Speed PWM Peripheral)"),
     ("PCB", "Printed Circuit Board"),
-    ("PZT", "Lead Zirconate Titanate (Piezoelectric Ceramic Material)"),
+    ("PZT", "Lead Zirconate Titanate (Piezoelectric Ceramic)"),
     ("PWM", "Pulse Width Modulation"),
     ("REST", "Representational State Transfer"),
     ("RMS", "Root Mean Square"),
-    ("RTOS", "Real-Time Operating System (FreeRTOS)"),
-    ("SDG", "Sustainable Development Goals (United Nations)"),
-    ("SPL", "Sound Pressure Level (expressed in decibels relative to 20 µPa)"),
-    ("SSID", "Service Set Identifier (Wi-Fi Network Name)"),
-    ("TX", "Transmitter / Transducer"),
-    ("UI", "User Interface"),
+    ("RTOS", "Real-Time Operating System"),
+    ("SPL", "Sound Pressure Level (dB re 20 µPa)"),
     ("Vpp", "Volts Peak-to-Peak")
 ]
 
-tbl_acro = doc.add_table(rows=len(acronym_items), cols=2)
-tbl_acro.alignment = WD_TABLE_ALIGNMENT.CENTER
-for r_i, (acr, exp) in enumerate(acronym_items):
-    row = tbl_acro.rows[r_i]
-    c_a, c_e = row.cells[0], row.cells[1]
-    c_a.width, c_e.width = Inches(1.5), Inches(5.1)
-    set_cell_margins(c_a, top=20, bottom=20, left=30, right=30)
-    set_cell_margins(c_e, top=20, bottom=20, left=30, right=30)
-    
-    p0 = c_a.paragraphs[0]
-    r0 = p0.add_run(acr)
-    r0.font.name = "Times New Roman"
-    r0.font.size = Pt(10)
-    r0.font.bold = True
-    
-    p1 = c_e.paragraphs[0]
-    r1 = p1.add_run(exp)
-    r1.font.name = "Times New Roman"
-    r1.font.size = Pt(10)
+for r_idx, (acr, full) in enumerate(acronym_items):
+    row = tbl_t2.rows[r_idx + 1]
+    row.cells[0].paragraphs[0].text = acr
+    row.cells[1].paragraphs[0].text = full
 
-tblPr = tbl_acro._tbl.tblPr
-borders = parse_xml(
-    f'<w:tblBorders {nsdecls("w")}>\n'
-    f'  <w:top w:val="none"/>\n'
-    f'  <w:bottom w:val="none"/>\n'
-    f'  <w:insideH w:val="none"/>\n'
-    f'  <w:insideV w:val="none"/>\n'
-    f'  <w:left w:val="none"/>\n'
-    f'  <w:right w:val="none"/>\n'
-    f'</w:tblBorders>'
-)
-tblPr.append(borders)
+style_academic_table(tbl_t2, header_fill="EAEAEA")
+doc.add_paragraph().paragraph_format.space_after = Pt(12)
 
 doc.add_page_break()
 
 # ==========================================
-# 9. CHAPTER 1: INTRODUCTION
+# 11. CHAPTER 1: INTRODUCTION
 # ==========================================
 print("Writing Chapter 1: Introduction...")
 
-p_c1 = doc.add_paragraph()
-p_c1.alignment = WD_ALIGN_PARAGRAPH.CENTER
-p_c1.paragraph_format.space_before = Pt(12)
-p_c1.paragraph_format.space_after = Pt(4)
-r_c1_sub = p_c1.add_run("CHAPTER 1\n")
-r_c1_sub.font.name = "Times New Roman"
-r_c1_sub.font.size = Pt(14)
-r_c1_sub.font.bold = True
-r_c1_sub.font.color.rgb = COLOR_MUTED
+add_chapter_header(doc, "1", "Introduction")
 
-r_c1_main = p_c1.add_run("INTRODUCTION")
-r_c1_main.font.name = "Times New Roman"
-r_c1_main.font.size = Pt(16)
-r_c1_main.font.bold = True
-r_c1_main.font.color.rgb = COLOR_BLUE
-
-add_heading_1(doc, "1.1 Background and Motivation")
+add_heading_1(doc, "1.1  Background and Motivation")
 add_body_p(
     doc,
     "The ability to manipulate physical matter without mechanical surface contact is a transformative capability spanning modern physics, analytical chemistry, biotechnology, and advanced micromanufacturing. When handling fragile micro-components, biological living cells, or volatile ultra-pure pharmaceutical reagents, physical contact with solid tweezers, mechanical end-effectors, or pipettes inevitably introduces surface friction, mechanical shear stresses, electrostatic charge contamination, and material adhesion losses. Contactless handling modalities—such as optical tweezers, magnetic levitation, electrostatic trapping, and acoustic levitation—have consequently emerged to circumvent these physical constraints."
@@ -1090,10 +971,10 @@ add_body_p(
 add_figure(
     doc,
     os.path.join(fig_dir, "fig1_1_acoustic_levitation_concept.png"),
-    "Figure 1.1: Physical Concept of Acoustic Levitation, Standing Wave Superposition, and Pressure Node Formation"
+    "Figure 1.1: Physical Principle of Ultrasonic Standing Wave Levitation and Node Formation"
 )
 
-add_heading_1(doc, "1.2 Theoretical Foundations of Acoustic Radiation Force")
+add_heading_1(doc, "1.2  Theoretical Foundations of Acoustic Radiation Force")
 add_body_p(
     doc,
     "Acoustic levitation operates via the non-linear acoustic radiation pressure arising from the interaction between high-intensity ultrasonic waves and suspended objects. When two coherent, opposing ultrasonic waves of identical frequency f = 40 kHz propagate toward each other, their interference creates an acoustic standing wave field characterized by alternating planes of zero acoustic pressure oscillation (pressure nodes) and maximum acoustic pressure fluctuation (pressure antinodes). Conversely, the acoustic particle velocity exhibits the inverted spatial distribution: velocity antinodes coincide with pressure nodes, and velocity nodes coincide with pressure antinodes."
@@ -1103,12 +984,11 @@ add_body_p(
     "In 1962, L. P. Gor'kov established the foundational theoretical framework quantifying the primary acoustic radiation force experienced by a small spherical particle suspended in an arbitrary acoustic standing field. Gor'kov demonstrated that the acoustic radiation force can be represented as the negative gradient of an effective mean acoustic potential function, U. For rigid, compressible particles whose radius is significantly smaller than the acoustic wavelength (r << λ), the acoustic potential forces the object away from regions of high kinetic and potential energy density, stably trapping it within the acoustic pressure nodes where the gradient of the potential vanishes and restoring forces counteract gravitational acceleration."
 )
 
-add_heading_1(doc, "1.3 Problem Statement & Current Limitations")
+add_heading_1(doc, "1.3  Problem Statement & Current Limitations")
 add_body_p(
     doc,
     "Despite its extraordinary promise, the widespread adoption of acoustic levitation within standard laboratories, clinical classrooms, and industrial automated assembly lines has been severely impeded by several architectural and electronic limitations:"
 )
-
 add_body_p(
     doc,
     "1. Excessive Cost and Laboratory Tethering: Conventional academic levitation setups rely upon high-end laboratory signal generators, multi-channel linear RF power amplifiers, and bulky power supplies costing several thousands of dollars, restricting experimentation to specialized physics laboratories.",
@@ -1130,7 +1010,7 @@ add_body_p(
     bold_prefix="• "
 )
 
-add_heading_1(doc, "1.4 Objectives of the Research Project")
+add_heading_1(doc, "1.4  Objectives of the Research Project")
 add_body_p(
     doc,
     "To overcome these bottlenecks, this research aims to design, construct, program, and rigorously validate a low-cost, portable, internet-enabled 6-transducer acoustic levitator. The core engineering objectives are:"
@@ -1161,7 +1041,7 @@ add_body_p(
     bold_prefix="5. "
 )
 
-add_heading_1(doc, "1.5 Organization of the Thesis")
+add_heading_1(doc, "1.5  Organization of the Thesis")
 add_body_p(
     doc,
     "The remainder of this thesis report is organized into four subsequent chapters: Chapter 2 reviews the literature on acoustic radiation physics, Gor'kov potential derivations, and piezoelectric transducer models. Chapter 3 details the system methodology, including ESP32 timer registers, L293D push-pull driving, cavity geometry, wiring matrix, and IoT firmware architecture. Chapter 4 presents experimental results, SPL measurements, thermal profiles, phase translation curves, and performance benchmarks. Finally, Chapter 5 concludes the report and discusses future research horizons."
@@ -1170,27 +1050,13 @@ add_body_p(
 doc.add_page_break()
 
 # ==========================================
-# 10. CHAPTER 2: LITERATURE SURVEY & ACOUSTIC PHYSICS
+# 12. CHAPTER 2: LITERATURE SURVEY
 # ==========================================
 print("Writing Chapter 2: Literature Survey...")
 
-p_c2 = doc.add_paragraph()
-p_c2.alignment = WD_ALIGN_PARAGRAPH.CENTER
-p_c2.paragraph_format.space_before = Pt(12)
-p_c2.paragraph_format.space_after = Pt(4)
-r_c2_sub = p_c2.add_run("CHAPTER 2\n")
-r_c2_sub.font.name = "Times New Roman"
-r_c2_sub.font.size = Pt(14)
-r_c2_sub.font.bold = True
-r_c2_sub.font.color.rgb = COLOR_MUTED
+add_chapter_header(doc, "2", "Literature Survey & Acoustic Physics")
 
-r_c2_main = p_c2.add_run("LITERATURE SURVEY & ACOUSTIC PHYSICS")
-r_c2_main.font.name = "Times New Roman"
-r_c2_main.font.size = Pt(16)
-r_c2_main.font.bold = True
-r_c2_main.font.color.rgb = COLOR_BLUE
-
-add_heading_1(doc, "2.1 Historical Evolution of Acoustic Levitation")
+add_heading_1(doc, "2.1  Historical Evolution of Acoustic Levitation")
 add_body_p(
     doc,
     "The phenomenon of acoustic standing waves was first systematically investigated by August Kundt in 1866 using his iconic Kundt's tube, wherein lycopodium dust gathered at the acoustic velocity nodes of an excited glass cylinder. In 1934, L. V. King published the first rigorous mathematical treatment of acoustic radiation forces acting on rigid, incompressible spherical particles in an acoustic field. King demonstrated that a second-order time-averaged pressure gradient is exerted on any boundary immersed within a non-uniform acoustic wave field."
@@ -1200,7 +1066,7 @@ add_body_p(
     "In 1962, Soviet physicist Lev P. Gor'kov significantly expanded upon King's formulation by developing an analytical framework that incorporated the thermodynamic compressibility of both the particle and the host fluid. Gor'kov's potential remains the universal benchmark for acoustic levitation modeling today. Modern breakthroughs began in 2013 with Foresti et al. (ETH Zurich), who demonstrated planar multi-axis transport of pharmaceutical droplets, and Marzo et al. (University of Bristol / Public University of Navarre) in 2015, who introduced single-sided phased arrays capable of generating acoustic holograms, twin traps, and acoustic vortex beams."
 )
 
-add_heading_1(doc, "2.2 Physics of Acoustic Standing Waves and Radiation Pressure")
+add_heading_1(doc, "2.2  Physics of Acoustic Standing Waves and Radiation Pressure")
 add_body_p(
     doc,
     "Consider an acoustic plane wave propagating along the z-axis in an inviscid fluid medium of ambient density ρ0 and acoustic speed of sound c0. When two equal-amplitude counter-propagating acoustic waves interfere, the resulting acoustic pressure field p(z, t) and particle velocity field v(z, t) are given by:"
@@ -1217,10 +1083,10 @@ add_body_p(
 add_figure(
     doc,
     os.path.join(fig_dir, "fig2_1_standing_wave_distribution.png"),
-    "Figure 2.1: Spatial Distribution of Acoustic Pressure and Particle Velocity Standing Waves within the Levitation Cavity"
+    "Figure 2.1: Spatial Acoustic Pressure and Velocity Standing Wave Distribution across the Cavity"
 )
 
-add_heading_1(doc, "2.3 Derivation of the Gor'kov Acoustic Potential")
+add_heading_1(doc, "2.3  Derivation of the Gor'kov Acoustic Potential")
 add_body_p(
     doc,
     "For a spherical particle of radius r (with r << λ) suspended in an arbitrary acoustic standing field, Gor'kov demonstrated that the time-averaged primary acoustic radiation force Frad is conservative and can be expressed as the negative gradient of an effective acoustic potential U:"
@@ -1260,7 +1126,7 @@ add_equation_box(doc, "F_{rad, z} = -\\frac{\\partial U}{\\partial z} = \\left( 
 add_figure(
     doc,
     os.path.join(fig_dir, "fig2_2_gorkov_potential_force.png"),
-    "Figure 2.2: Gor'kov Acoustic Potential Well U(z) and Trapping Restoring Force Frad(z) Counteracting Gravitational Acceleration"
+    "Figure 2.2: Gor'kov Acoustic Potential Well U and Trapping Restoring Force Frad Counteracting Gravity"
 )
 
 add_body_p(
@@ -1282,7 +1148,7 @@ add_body_p(
     "For expanded polystyrene particles (ρp = 25 kg/m³) in air (ρ0 = 1.2 kg/m³, c0 = 343 m/s) at f = 40 kHz (k = 732.7 rad/m), Equation 2.10 dictates that the minimum required acoustic pressure amplitude is P0 ≈ 1,420 Pa (equivalent to a Sound Pressure Level of 157.0 dB SPL re 20 µPa). This mathematical requirement dictates that high driving voltages and resonant acoustic cavities are indispensable."
 )
 
-add_heading_1(doc, "2.4 Resonant Dynamics of 40 kHz Piezoelectric Transducers")
+add_heading_1(doc, "2.4  Resonant Dynamics of 40 kHz Piezoelectric Transducers")
 add_body_p(
     doc,
     "The electro-acoustic conversion elements employed in this project are 16 mm aluminium-cased piezoelectric ceramic transducers (lead zirconate titanate, PZT-5A). Electrically, a piezoelectric transducer behaves according to the Butterworth-Van Dyke (BVD) equivalent circuit model, comprising a static parallel clamping capacitance C0 (~2.2 nF) in parallel with a dynamic motional branch consisting of motional inductance Lm (~85 mH), motional capacitance Cm (~0.18 pF), and mechanical damping resistance Rm (~80 Ω)."
@@ -1292,26 +1158,20 @@ add_body_p(
     "The electrical impedance reaches a pronounced minimum at the mechanical series resonance frequency fs = 1 / (2π√(Lm Cm)) ≈ 40.0 kHz, where inductive reactance cancels capacitive reactance, maximizing acoustic output power. Driving the transducer even 1 kHz off-resonance causes the motional branch impedance to skyrocket, decreasing acoustic output by over 18 dB. Consequently, active frequency trimming via microcontroller firmware is critical to compensate for thermal drift during operation."
 )
 
-add_heading_1(doc, "2.5 Critical Analysis and Gaps Identified in Prior Works")
+add_heading_1(doc, "2.5  Critical Analysis and Gaps Identified in Prior Works")
 add_body_p(
     doc,
     "A systematic review of academic literature reveals distinct paradigms in acoustic levitator design, each with substantial engineering trade-offs, as summarized in Table 2.1:"
 )
 
 # Table 2.1
-tbl_lit = doc.add_table(rows=5, cols=6)
-tbl_lit.alignment = WD_TABLE_ALIGNMENT.CENTER
-lit_headers = ["Parameter / Feature", "Classic Langevin Horn", "TinyLev (Marzo 2017)", "Acoustic Hologram Array", "Proposed System (This Work)"]
-# Let's adjust table headers to 5 columns
-# Actually let's recreate table with 5 columns
-tbl_lit = doc.add_table(rows=6, cols=5)
-tbl_lit.alignment = WD_TABLE_ALIGNMENT.CENTER
-lit_cols = ["Architectural Feature", "Langevin Horn Levitation", "TinyLev (Marzo 2017)", "Phased Holographic Array", "Proposed System (This Work)"]
-for c_i, h in enumerate(lit_cols):
-    tbl_lit.cell(0, c_i).paragraphs[0].text = h
-style_table_header(tbl_lit.rows[0])
+tbl_t21 = doc.add_table(rows=6, cols=5)
+tbl_t21.alignment = WD_TABLE_ALIGNMENT.CENTER
+t21_headers = ["Architectural Feature", "Langevin Horn Levitation", "TinyLev (Marzo 2017)", "Phased Holographic Array", "Proposed System (This Work)"]
+for c_i, h in enumerate(t21_headers):
+    tbl_t21.cell(0, c_i).paragraphs[0].text = h
 
-lit_rows = [
+t21_rows = [
     ("Transducer Count & Type", "1 Langevin horn + reflector", "72 Open-type 40 kHz PZT", "64 to 256 PZT Transducers", "6 40 kHz Piezo Transducers"),
     ("Driving Power Topology", "Analog linear amplifier (>100W)", "Dual L298N H-Bridges (16V)", "Discrete MOSFET array", "Dual L293D Push-Pull (24Vpp)"),
     ("Microcontroller Core", "Laboratory Signal Gen.", "Arduino Nano (ATmega328P)", "FPGA / Cyclone V", "ESP32 Tensilica Dual-Core"),
@@ -1319,38 +1179,24 @@ lit_rows = [
     ("Wireless IoT Connectivity", "None (Lab bench tethered)", "None (Serial USB only)", "None / External PC control", "Embedded Wi-Fi REST Web UI")
 ]
 
-for r_i, r_data in enumerate(lit_rows):
-    row = tbl_lit.rows[r_i + 1]
-    for c_i, val in enumerate(r_data):
-        row.cells[c_i].paragraphs[0].text = val
+for r_idx, r_data in enumerate(t21_rows):
+    row = tbl_t21.rows[r_idx + 1]
+    for c_idx, val in enumerate(r_data):
+        row.cells[c_idx].paragraphs[0].text = val
 
-format_table_cells(tbl_lit)
+style_academic_table(tbl_t21, header_fill="EAEAEA")
 add_caption(doc, "Table 2.1: Comparative Evaluation of Prior Acoustic Levitation Architectures vs. Proposed System")
 
 doc.add_page_break()
 
 # ==========================================
-# 11. CHAPTER 3: METHODOLOGY AND SYSTEM DESIGN
+# 13. CHAPTER 3: METHODOLOGY
 # ==========================================
 print("Writing Chapter 3: Methodology...")
 
-p_c3 = doc.add_paragraph()
-p_c3.alignment = WD_ALIGN_PARAGRAPH.CENTER
-p_c3.paragraph_format.space_before = Pt(12)
-p_c3.paragraph_format.space_after = Pt(4)
-r_c3_sub = p_c3.add_run("CHAPTER 3\n")
-r_c3_sub.font.name = "Times New Roman"
-r_c3_sub.font.size = Pt(14)
-r_c3_sub.font.bold = True
-r_c3_sub.font.color.rgb = COLOR_MUTED
+add_chapter_header(doc, "3", "Methodology and System Design")
 
-r_c3_main = p_c3.add_run("METHODOLOGY AND SYSTEM DESIGN")
-r_c3_main.font.name = "Times New Roman"
-r_c3_main.font.size = Pt(16)
-r_c3_main.font.bold = True
-r_c3_main.font.color.rgb = COLOR_BLUE
-
-add_heading_1(doc, "3.1 Overall System Architecture")
+add_heading_1(doc, "3.1  Overall System Architecture")
 add_body_p(
     doc,
     "The internet-enabled acoustic levitation manipulation system is engineered around four deeply integrated functional sub-systems: (1) an ESP32 dual-core microcontroller acting as the high-speed timing and IoT server hub; (2) a dual L293D push-pull H-bridge power amplifier network; (3) a precision 6-transducer acoustic resonance cavity; and (4) an asynchronous embedded web application. Figure 3.1 delineates the complete system block diagram and operational data flow."
@@ -1359,7 +1205,7 @@ add_body_p(
 add_figure(
     doc,
     os.path.join(fig_dir, "fig3_1_system_architecture.png"),
-    "Figure 3.1: End-to-End System Block Diagram: ESP32 Hardware Core Allocation, Drivers, Transducer Cavity, and Web Control"
+    "Figure 3.1: End-to-End System Block Diagram: ESP32 Cores, Dual Drivers, Cavity, and Web Control"
 )
 
 add_body_p(
@@ -1367,7 +1213,7 @@ add_body_p(
     "Operating under FreeRTOS, the ESP32 divides computational responsibilities across its two 32-bit Tensilica LX6 cores: Core 0 is dedicated to high-speed hardware LEDC timers, zero-latency GPIO phase switching, and serial debug commands. Core 1 runs the networking stack, managing the Wi-Fi 802.11 physical radio layer, HTTP REST API endpoints, and dynamic web page rendering without injecting latency or clock jitter into the ultrasonic waveform generation."
 )
 
-add_heading_1(doc, "3.2 ESP32 APB Clock Synchronization & Hardware LEDC Timers")
+add_heading_1(doc, "3.2  ESP32 APB Clock Synchronization & Hardware LEDC Timers")
 add_body_p(
     doc,
     "To eliminate phase jitter and software timing drift, the four ultrasonic drive signals are synthesized entirely in hardware by configuring the ESP32 LED Control (LEDC) peripheral clocked by the 80 MHz Advanced Peripheral Bus (APB). The nominal output frequency f0 = 40.0 kHz is established by selecting an 8-bit timer counter resolution (2⁸ = 256 discrete timer ticks per cycle). The APB clock prescaler divider DIV is derived analytically as:"
@@ -1380,13 +1226,13 @@ add_body_p(
     "Because the ESP32 LEDC hardware timer supports fractional clock dividers (with an 8-bit integer and 10-bit fractional component), a prescaler of 7 + 832/1024 achieves an exact 40,000.0 Hz clock frequency with absolute zero timing drift. A 50% duty cycle is enforced across all four output channels by fixing the comparator match register at exactly half the counter period: DUTY = 256 / 2 = 128 ticks."
 )
 
-add_callout(
+add_callout_bw(
     doc,
     "The 8-bit timer resolution divides each 25 µs ultrasonic period into 256 discrete phase ticks. This grants an ultra-fine phase control resolution of Δθ = 360° / 256 = 1.40625° per tick. Moving the bottom array by 4 ticks imparts a phase shift of 5.625°, corresponding to a vertical node displacement of approximately 66.4 micrometers.",
     title="KEY ARCHITECTURAL ADVANTAGE:"
 )
 
-add_heading_1(doc, "3.3 Dual L293D Push-Pull Driver Network (24 Vpp Differential Drive)")
+add_heading_1(doc, "3.3  Dual L293D Push-Pull Driver Network (24 Vpp Differential Drive)")
 add_body_p(
     doc,
     "A major technical challenge in portable acoustic levitation is generating the high acoustic sound pressure levels (>150 dB SPL) required for levitation using low-voltage DC power. Conventional piezoelectric transducers require at least 20 V to 40 V peak-to-peak. Rather than incorporating heavy boost converters or step-up transformers (which radiate severe electromagnetic interference and degrade battery portability), this project employs a differential push-pull H-bridge topology utilizing two L293D quadruple half-H bridge drivers powered by a single 12 V DC supply."
@@ -1406,10 +1252,10 @@ add_body_p(
 add_figure(
     doc,
     os.path.join(fig_dir, "fig3_4_push_pull_waveforms.png"),
-    "Figure 3.4: ESP32 APB Complementary PWM Drive and Resulting 24 Vpp Push-Pull Differential Output Waveforms across Transducers"
+    "Figure 3.4: ESP32 APB Complementary PWM Drive and Resulting 24 Vpp Differential Output Waveforms"
 )
 
-add_heading_1(doc, "3.4 6-Transducer Acoustic Cavity Geometry and Resonance")
+add_heading_1(doc, "3.4  6-Transducer Acoustic Cavity Geometry and Resonance")
 add_body_p(
     doc,
     "The physical acoustic cavity comprises six 16 mm 40 kHz piezoelectric transducers organized into two opposing arrays: a top array of three transducers oriented downwards, and a bottom array of three transducers oriented upwards. Within each 3-transducer cluster, elements are arranged in an equilateral triangular geometry with an inter-element pitch of 17.5 mm. To achieve optimal acoustic constructive interference along the central vertical z-axis, each transducer is tilted inward by a concave focal angle of α = 12.0°."
@@ -1431,10 +1277,10 @@ add_equation_box(doc, "D = 17 \\times \\left( \\frac{8.65\\text{ mm}}{2} \\right
 add_figure(
     doc,
     os.path.join(fig_dir, "fig3_2_cavity_geometry.png"),
-    "Figure 3.2: 6-Transducer Cavity Geometry, Concave Emitter Alignment, and Semi-Wavelength Focal Spacing"
+    "Figure 3.2: 6-Transducer Cavity Geometry, Concave Emitter Alignment, and Semi-Wavelength Spacing"
 )
 
-add_heading_1(doc, "3.5 Master Pinout and Interconnection Matrix")
+add_heading_1(doc, "3.5  Master Pinout and Interconnection Matrix")
 add_body_p(
     doc,
     "The electronic hardware layout incorporates an LM2596 high-efficiency buck regulator stepping down the main 12 V DC rail to 5.0 V DC to power the ESP32 VIN and L293D logic rails (VCC1). Figure 3.3 presents the complete circuit schematic, and Table 3.1 details the exact hardware wiring matrix."
@@ -1443,16 +1289,15 @@ add_body_p(
 add_figure(
     doc,
     os.path.join(fig_dir, "fig3_3_circuit_schematic_wiring.png"),
-    "Figure 3.3: Master Circuit Schematic: ESP32 to Dual L293D Drivers, Power Decoupling, and 6-Transducer Differential Wiring"
+    "Figure 3.3: Master Circuit Schematic: ESP32 to Dual L293D Drivers and 6-Transducer Differential Wiring"
 )
 
 # Table 3.1
-tbl_pin = doc.add_table(rows=11, cols=4)
-tbl_pin.alignment = WD_TABLE_ALIGNMENT.CENTER
-pin_headers = ["ESP32 GPIO Pin", "Driver IC & Pin Connection", "Transducer Array & Channel", "Functional Electrical Signal Description"]
-for c_i, h in enumerate(pin_headers):
-    tbl_pin.cell(0, c_i).paragraphs[0].text = h
-style_table_header(tbl_pin.rows[0])
+tbl_t31 = doc.add_table(rows=11, cols=4)
+tbl_t31.alignment = WD_TABLE_ALIGNMENT.CENTER
+t31_headers = ["ESP32 GPIO Pin", "Driver IC & Pin Connection", "Transducer Array & Channel", "Electrical Signal Description"]
+for c_i, h in enumerate(t31_headers):
+    tbl_t31.cell(0, c_i).paragraphs[0].text = h
 
 pin_data = [
     ("GPIO 4", "IC 1 Pin 2 (1A) & Pin 15 (4A)", "Top Array (Transducers 1, 2, 3)", "Top Phase A (0° reference 40 kHz PWM)"),
@@ -1467,21 +1312,20 @@ pin_data = [
     ("Output Pin 14 & 11", "IC 1 Pins 14 (4Y) & 11 (3Y)", "Top Transducer #3", "24 Vpp Differential Drive Rail (Top Bridge 2)")
 ]
 
-for r_i, r_data in enumerate(pin_data):
-    row = tbl_pin.rows[r_i + 1]
-    for c_i, val in enumerate(r_data):
-        row.cells[c_i].paragraphs[0].text = val
+for r_idx, r_data in enumerate(pin_data):
+    row = tbl_t31.rows[r_idx + 1]
+    for c_idx, val in enumerate(r_data):
+        row.cells[c_idx].paragraphs[0].text = val
 
-format_table_cells(tbl_pin)
+style_academic_table(tbl_t31, header_fill="EAEAEA")
 add_caption(doc, "Table 3.1: Complete Master Hardware Pinout and Interconnection Matrix")
 
 # Table 3.2
-tbl_param = doc.add_table(rows=8, cols=3)
-tbl_param.alignment = WD_TABLE_ALIGNMENT.CENTER
-param_headers = ["Engineering Parameter", "Design Specification Value", "Operational Significance / Remark"]
-for c_i, h in enumerate(param_headers):
-    tbl_param.cell(0, c_i).paragraphs[0].text = h
-style_table_header(tbl_param.rows[0])
+tbl_t32 = doc.add_table(rows=8, cols=3)
+tbl_t32.alignment = WD_TABLE_ALIGNMENT.CENTER
+t32_headers = ["Engineering Parameter", "Design Specification Value", "Operational Significance / Remark"]
+for c_i, h in enumerate(t32_headers):
+    tbl_t32.cell(0, c_i).paragraphs[0].text = h
 
 param_data = [
     ("Acoustic Operating Frequency", "40.0 kHz (Tuning: 38.5 – 41.5 kHz)", "Matches mechanical series resonance of 16mm PZT transducers"),
@@ -1493,15 +1337,15 @@ param_data = [
     ("Total System Power Consumption", "5.6 Watts (Active Continuous Levitation)", "Highly efficient; suitable for portable field battery operation")
 ]
 
-for r_i, r_data in enumerate(param_data):
-    row = tbl_param.rows[r_i + 1]
-    for c_i, val in enumerate(r_data):
-        row.cells[c_i].paragraphs[0].text = val
+for r_idx, r_data in enumerate(param_data):
+    row = tbl_t32.rows[r_idx + 1]
+    for c_idx, val in enumerate(r_data):
+        row.cells[c_idx].paragraphs[0].text = val
 
-format_table_cells(tbl_param)
+style_academic_table(tbl_t32, header_fill="EAEAEA")
 add_caption(doc, "Table 3.2: System Physical Dimensions, Acoustic Parameters, and Electrical Specifications")
 
-add_heading_1(doc, "3.6 Embedded Firmware & IoT REST Control Engine")
+add_heading_1(doc, "3.6  Embedded Firmware & IoT REST Control Engine")
 add_body_p(
     doc,
     "The embedded C++ firmware (project.ino) is architected to deliver deterministic real-time hardware control alongside a responsive, zero-install web interface. Core firmware components include:"
@@ -1525,27 +1369,13 @@ add_body_p(
 doc.add_page_break()
 
 # ==========================================
-# 12. CHAPTER 4: RESULTS AND DISCUSSION
+# 14. CHAPTER 4: RESULTS AND DISCUSSION
 # ==========================================
 print("Writing Chapter 4: Results...")
 
-p_c4 = doc.add_paragraph()
-p_c4.alignment = WD_ALIGN_PARAGRAPH.CENTER
-p_c4.paragraph_format.space_before = Pt(12)
-p_c4.paragraph_format.space_after = Pt(4)
-r_c4_sub = p_c4.add_run("CHAPTER 4\n")
-r_c4_sub.font.name = "Times New Roman"
-r_c4_sub.font.size = Pt(14)
-r_c4_sub.font.bold = True
-r_c4_sub.font.color.rgb = COLOR_MUTED
+add_chapter_header(doc, "4", "Results and Discussion")
 
-r_c4_main = p_c4.add_run("RESULTS AND DISCUSSION")
-r_c4_main.font.name = "Times New Roman"
-r_c4_main.font.size = Pt(16)
-r_c4_main.font.bold = True
-r_c4_main.font.color.rgb = COLOR_BLUE
-
-add_heading_1(doc, "4.1 Sound Pressure Level (SPL) and Resonance Tuning")
+add_heading_1(doc, "4.1  Sound Pressure Level (SPL) and Resonance Tuning")
 add_body_p(
     doc,
     "The electro-acoustic performance of the 6-transducer array was quantitatively characterized using a calibrated high-frequency decibel sound pressure meter and wideband condenser microphone placed along the central acoustic axis. Driving frequency was stepped from 38.0 kHz to 42.0 kHz in 100 Hz increments while recording the peak acoustic sound pressure level (SPL re 20 µPa) within the cavity."
@@ -1561,7 +1391,7 @@ add_figure(
     "Figure 4.1: Measured Acoustic Sound Pressure Level (SPL) Response across 38.0 kHz to 42.0 kHz Frequency Sweep"
 )
 
-add_heading_1(doc, "4.2 Particle Trapping Stability and Vertical Phase Translation")
+add_heading_1(doc, "4.2  Particle Trapping Stability and Vertical Phase Translation")
 add_body_p(
     doc,
     "Levitation experiments were conducted using expanded polystyrene (EPS) spherical beads of diameters ranging from 1.5 mm to 3.5 mm (densities ρp ≈ 25 kg/m³, masses m ≈ 0.5 mg to 8.2 mg). Upon activating the array at 40.0 kHz and 24 Vpp push-pull drive, multiple EPS particles were stably trapped simultaneously at discrete acoustic pressure nodes spaced at intervals of λ/2 ≈ 4.3 mm along the central vertical z-axis."
@@ -1584,7 +1414,7 @@ add_figure(
     "Figure 4.2: Stable Particle Trapping in Multi-Node Cavity and Linear Node Displacement vs. Driving Phase Shift"
 )
 
-add_heading_1(doc, "4.3 Thermal Profiling and Electrical Power Dissipation")
+add_heading_1(doc, "4.3  Thermal Profiling and Electrical Power Dissipation")
 add_body_p(
     doc,
     "Thermal management is critical in portable acoustic systems, as continuous inductive switching through H-bridges generates resistive and switching heat losses. Thermal profiling of the dual L293D motor driver ICs was monitored using a calibrated FLIR infrared thermal sensor under continuous continuous operation with passive copper heatsinks attached."
@@ -1600,25 +1430,24 @@ add_figure(
     "Figure 4.3: L293D Motor Driver Thermal Rise Curve and System Power Dissipation Breakdown over Time"
 )
 
-add_heading_1(doc, "4.4 Web Interface Responsiveness and Latency Analysis")
+add_heading_1(doc, "4.4  Web Interface Responsiveness and Latency Analysis")
 add_body_p(
     doc,
     "Round-trip latency of the embedded REST web interface was evaluated over 500 consecutive HTTP GET and POST requests transmitted via a 2.4 GHz 802.11n Wi-Fi local network. The mean round-trip time for status queries was 11.4 ms (standard deviation σ = 2.1 ms). Actuator control commands (such as phase shifting and frequency adjustment) executed with a mean latency of 14.2 ms, verifying that the dual-core architecture successfully isolates web server network handling on Core 1 without degrading the real-time PWM timers on Core 0."
 )
 
-add_heading_1(doc, "4.5 Comparative Performance Benchmark")
+add_heading_1(doc, "4.5  Comparative Performance Benchmark")
 add_body_p(
     doc,
     "Table 4.1 summarizes the measured experimental figures of merit, and Table 4.2 benchmarks the proposed acoustic levitation system against landmark implementations in the peer-reviewed literature."
 )
 
 # Table 4.1
-tbl_res = doc.add_table(rows=8, cols=3)
-tbl_res.alignment = WD_TABLE_ALIGNMENT.CENTER
-res_headers = ["Performance Metric", "Measured Experimental Value", "Measurement Condition / Method"]
-for c_i, h in enumerate(res_headers):
-    tbl_res.cell(0, c_i).paragraphs[0].text = h
-style_table_header(tbl_res.rows[0])
+tbl_t41 = doc.add_table(rows=8, cols=3)
+tbl_t41.alignment = WD_TABLE_ALIGNMENT.CENTER
+t41_headers = ["Performance Metric", "Measured Experimental Value", "Measurement Condition / Method"]
+for c_i, h in enumerate(t41_headers):
+    tbl_t41.cell(0, c_i).paragraphs[0].text = h
 
 res_data = [
     ("Center Resonant Frequency", "40.05 kHz", "Peak SPL detected via sweep from 38.0 to 42.0 kHz"),
@@ -1630,21 +1459,20 @@ res_data = [
     ("Steady-State Driver Temperature", "52.4°C (Ambient: 24.2°C)", "FLIR thermal camera after 60 min continuous levitation")
 ]
 
-for r_i, r_data in enumerate(res_data):
-    row = tbl_res.rows[r_i + 1]
-    for c_i, val in enumerate(r_data):
-        row.cells[c_i].paragraphs[0].text = val
+for r_idx, r_data in enumerate(res_data):
+    row = tbl_t41.rows[r_idx + 1]
+    for c_idx, val in enumerate(r_data):
+        row.cells[c_idx].paragraphs[0].text = val
 
-format_table_cells(tbl_res)
+style_academic_table(tbl_t41, header_fill="EAEAEA")
 add_caption(doc, "Table 4.1: Measured Acoustic, Mechanical, and Electrical Experimental Performance Metrics")
 
 # Table 4.2
-tbl_bench = doc.add_table(rows=6, cols=5)
-tbl_bench.alignment = WD_TABLE_ALIGNMENT.CENTER
-bench_headers = ["Benchmark Criterion", "TinyLev (Bristol 2017)", "Phased Array (Nature 2015)", "Commercial Levitator", "This Work (ESP32 6-TX)"]
-for c_i, h in enumerate(bench_headers):
-    tbl_bench.cell(0, c_i).paragraphs[0].text = h
-style_table_header(tbl_bench.rows[0])
+tbl_t42 = doc.add_table(rows=6, cols=5)
+tbl_t42.alignment = WD_TABLE_ALIGNMENT.CENTER
+t42_headers = ["Benchmark Criterion", "TinyLev (Bristol 2017)", "Phased Array (Nature 2015)", "Commercial Levitator", "This Work (ESP32 6-TX)"]
+for c_i, h in enumerate(t42_headers):
+    tbl_t42.cell(0, c_i).paragraphs[0].text = h
 
 bench_data = [
     ("Total Transducer Count", "72 (36 top + 36 bottom)", "64 (Single-sided array)", "1 Langevin Horn", "6 (3 top + 3 bottom)"),
@@ -1654,38 +1482,24 @@ bench_data = [
     ("Total Hardware Bill of Materials", "USD $140", "USD $850+", "USD $4,500+", "USD $28 (Highly Affordable)")
 ]
 
-for r_i, r_data in enumerate(bench_data):
-    row = tbl_bench.rows[r_i + 1]
-    for c_i, val in enumerate(r_data):
-        row.cells[c_i].paragraphs[0].text = val
+for r_idx, r_data in enumerate(bench_data):
+    row = tbl_t42.rows[r_idx + 1]
+    for c_idx, val in enumerate(r_data):
+        row.cells[c_idx].paragraphs[0].text = val
 
-format_table_cells(tbl_bench)
+style_academic_table(tbl_t42, header_fill="EAEAEA")
 add_caption(doc, "Table 4.2: Comprehensive Benchmark of Proposed System vs. State-of-the-Art Literature")
 
 doc.add_page_break()
 
 # ==========================================
-# 13. CHAPTER 5: CONCLUSION AND FUTURE SCOPE
+# 15. CHAPTER 5: CONCLUSION AND FUTURE SCOPE
 # ==========================================
 print("Writing Chapter 5: Conclusion...")
 
-p_c5 = doc.add_paragraph()
-p_c5.alignment = WD_ALIGN_PARAGRAPH.CENTER
-p_c5.paragraph_format.space_before = Pt(12)
-p_c5.paragraph_format.space_after = Pt(4)
-r_c5_sub = p_c5.add_run("CHAPTER 5\n")
-r_c5_sub.font.name = "Times New Roman"
-r_c5_sub.font.size = Pt(14)
-r_c5_sub.font.bold = True
-r_c5_sub.font.color.rgb = COLOR_MUTED
+add_chapter_header(doc, "5", "Conclusion and Future Scope")
 
-r_c5_main = p_c5.add_run("CONCLUSION AND FUTURE SCOPE")
-r_c5_main.font.name = "Times New Roman"
-r_c5_main.font.size = Pt(16)
-r_c5_main.font.bold = True
-r_c5_main.font.color.rgb = COLOR_BLUE
-
-add_heading_1(doc, "5.1 Concluding Remarks and Summary of Contributions")
+add_heading_1(doc, "5.1  Concluding Remarks and Summary of Contributions")
 add_body_p(
     doc,
     "This thesis has successfully conceptualized, designed, implemented, and empirically validated a portable, low-cost, internet-enabled acoustic levitation manipulation system. By harnessing the high-speed 80 MHz APB hardware timer peripheral of the dual-core ESP32 microcontroller, four phase-locked 40 kHz square waves were generated with zero timing jitter and an 8-bit timer resolution (1.406° phase resolution per tick). A dual L293D push-pull H-bridge power driver network eliminated the requirement for bulky step-up transformers, driving six 40 kHz piezoelectric transducers at 24 Vpp directly from a 12 V DC source."
@@ -1695,7 +1509,7 @@ add_body_p(
     "The 6-transducer acoustic cavity (opposing height D = 72.25 mm, corresponding to 17 semi-wavelengths) produced an intense standing wave field exceeding 154.2 dB SPL, establishing deep Gor'kov acoustic potential wells capable of stably levitating expanded polystyrene spheres (masses up to 8.2 mg). An asynchronous embedded HTTP REST web server running on Core 1 provided real-time frequency trimming (±100 Hz), sub-millimeter vertical node manipulation (12 µm/degree), and system diagnostics with round-trip latencies below 15 ms."
 )
 
-add_heading_1(doc, "5.2 Practical Advantages and Scalability")
+add_heading_1(doc, "5.2  Practical Advantages and Scalability")
 add_body_p(
     doc,
     "The principal advantages of the proposed acoustic levitation architecture include:"
@@ -1716,7 +1530,7 @@ add_body_p(
     bold_prefix="• "
 )
 
-add_heading_1(doc, "5.3 Future Research Enhancements")
+add_heading_1(doc, "5.3  Future Research Enhancements")
 add_body_p(
     doc,
     "Building upon the validated architecture, several compelling avenues for future research are identified:"
@@ -1740,7 +1554,7 @@ add_body_p(
 doc.add_page_break()
 
 # ==========================================
-# 14. APPENDIX 1: COMPLETE SOURCE CODE
+# 16. APPENDIX 1: COMPLETE SOURCE CODE
 # ==========================================
 print("Writing Appendix 1: Source Code...")
 
@@ -1748,17 +1562,17 @@ p_ap = doc.add_paragraph()
 p_ap.alignment = WD_ALIGN_PARAGRAPH.CENTER
 p_ap.paragraph_format.space_before = Pt(12)
 p_ap.paragraph_format.space_after = Pt(4)
-r_ap_sub = p_ap.add_run("APPENDIX 1\n")
+r_ap_sub = p_ap.add_run("Appendix 1\n")
 r_ap_sub.font.name = "Times New Roman"
 r_ap_sub.font.size = Pt(14)
 r_ap_sub.font.bold = True
-r_ap_sub.font.color.rgb = COLOR_MUTED
+r_ap_sub.font.color.rgb = COLOR_BLACK
 
-r_ap_main = p_ap.add_run("COMPLETE ESP32 FIRMWARE SOURCE CODE (project.ino)")
+r_ap_main = p_ap.add_run("Complete Source Code (project.ino)")
 r_ap_main.font.name = "Times New Roman"
 r_ap_main.font.size = Pt(16)
 r_ap_main.font.bold = True
-r_ap_main.font.color.rgb = COLOR_BLUE
+r_ap_main.font.color.rgb = COLOR_BLACK
 
 add_body_p(
     doc,
@@ -1863,20 +1677,19 @@ void loop() {
     server.handleClient();
 }"""
 
-# Insert code block with shading
+# Insert code block with academic border
 tbl_code = doc.add_table(rows=1, cols=1)
 tbl_code.alignment = WD_TABLE_ALIGNMENT.CENTER
 cell_c = tbl_code.cell(0, 0)
-set_cell_background(cell_c, "F8FAFC")
-set_cell_margins(cell_c, top=120, bottom=120, left=160, right=160)
+set_cell_background(cell_c, "F9F9F9")
+set_cell_margins(cell_c, top=100, bottom=100, left=140, right=140)
 
-# Borders
 borders = parse_xml(
     f'<w:tcBorders {nsdecls("w")}>\n'
-    f'  <w:left w:val="single" w:sz="12" w:space="0" w:color="94A3B8"/>\n'
-    f'  <w:top w:val="single" w:sz="4" w:space="0" w:color="E2E8F0"/>\n'
-    f'  <w:right w:val="single" w:sz="4" w:space="0" w:color="E2E8F0"/>\n'
-    f'  <w:bottom w:val="single" w:sz="4" w:space="0" w:color="E2E8F0"/>\n'
+    f'  <w:left w:val="single" w:sz="8" w:space="0" w:color="000000"/>\n'
+    f'  <w:top w:val="single" w:sz="4" w:space="0" w:color="CCCCCC"/>\n'
+    f'  <w:right w:val="single" w:sz="4" w:space="0" w:color="CCCCCC"/>\n'
+    f'  <w:bottom w:val="single" w:sz="4" w:space="0" w:color="CCCCCC"/>\n'
     f'</w:tcBorders>'
 )
 cell_c._tc.get_or_add_tcPr().append(borders)
@@ -1887,12 +1700,12 @@ p_code.paragraph_format.space_after = Pt(0)
 r_code = p_code.add_run(code_snippet)
 r_code.font.name = "Courier New"
 r_code.font.size = Pt(8.5)
-r_code.font.color.rgb = RGBColor(15, 23, 42)
+r_code.font.color.rgb = COLOR_BLACK
 
 doc.add_page_break()
 
 # ==========================================
-# 15. APPENDIX 2: MASTER HARDWARE PINOUT
+# 17. APPENDIX 2: MASTER HARDWARE PINOUT
 # ==========================================
 print("Writing Appendix 2: Hardware Guide...")
 
@@ -1900,17 +1713,17 @@ p_ap2 = doc.add_paragraph()
 p_ap2.alignment = WD_ALIGN_PARAGRAPH.CENTER
 p_ap2.paragraph_format.space_before = Pt(12)
 p_ap2.paragraph_format.space_after = Pt(4)
-r_ap2_sub = p_ap2.add_run("APPENDIX 2\n")
+r_ap2_sub = p_ap2.add_run("Appendix 2\n")
 r_ap2_sub.font.name = "Times New Roman"
 r_ap2_sub.font.size = Pt(14)
 r_ap2_sub.font.bold = True
-r_ap2_sub.font.color.rgb = COLOR_MUTED
+r_ap2_sub.font.color.rgb = COLOR_BLACK
 
-r_ap2_main = p_ap2.add_run("MASTER HARDWARE PINOUT & WIRING REFERENCE GUIDE")
+r_ap2_main = p_ap2.add_run("Master Hardware Pinout and Wiring Reference Guide")
 r_ap2_main.font.name = "Times New Roman"
 r_ap2_main.font.size = Pt(16)
 r_ap2_main.font.bold = True
-r_ap2_main.font.color.rgb = COLOR_BLUE
+r_ap2_main.font.color.rgb = COLOR_BLACK
 
 add_body_p(
     doc,
@@ -1946,19 +1759,19 @@ if os.path.exists(schematic_path):
 doc.add_page_break()
 
 # ==========================================
-# 16. BIBLIOGRAPHY
+# 18. BIBLIOGRAPHY (Matching Template)
 # ==========================================
 print("Writing Bibliography...")
 
 p_bib = doc.add_paragraph()
 p_bib.alignment = WD_ALIGN_PARAGRAPH.CENTER
 p_bib.paragraph_format.space_before = Pt(12)
-p_bib.paragraph_format.space_after = Pt(16)
-r_bib = p_bib.add_run("BIBLIOGRAPHY")
+p_bib.paragraph_format.space_after = Pt(18)
+r_bib = p_bib.add_run("Bibliography")
 r_bib.font.name = "Times New Roman"
-r_bib.font.size = Pt(15)
+r_bib.font.size = Pt(16)
 r_bib.font.bold = True
-r_bib.font.color.rgb = COLOR_NAVY
+r_bib.font.color.rgb = COLOR_BLACK
 
 citations = [
     "[1] L. V. King, \"On the acoustic radiation on the spheres,\" Proceedings of the Royal Society of London. Series A - Mathematical and Physical Sciences, vol. 147, no. 861, pp. 212–240, 1934.",
@@ -1988,125 +1801,90 @@ for cit in citations:
     r = p_c.add_run(cit)
     r.font.name = "Times New Roman"
     r.font.size = Pt(10.5)
+    r.font.color.rgb = COLOR_BLACK
 
 doc.add_page_break()
 
 # ==========================================
-# 17. BIODATA OF INVESTIGATORS
+# 19. BIODATA (Matching Template Format)
 # ==========================================
 print("Writing Biodata...")
 
 p_bio = doc.add_paragraph()
 p_bio.alignment = WD_ALIGN_PARAGRAPH.CENTER
 p_bio.paragraph_format.space_before = Pt(12)
-p_bio.paragraph_format.space_after = Pt(16)
-r_bio = p_bio.add_run("BIODATA OF INVESTIGATORS")
+p_bio.paragraph_format.space_after = Pt(18)
+r_bio = p_bio.add_run("Biodata")
 r_bio.font.name = "Times New Roman"
-r_bio.font.size = Pt(15)
+r_bio.font.size = Pt(16)
 r_bio.font.bold = True
-r_bio.font.color.rgb = COLOR_NAVY
+r_bio.font.color.rgb = COLOR_BLACK
 
 students_bio = [
     {
         "name": "RONIL",
         "reg": "24BCE1330",
-        "email": "ronil.24bce1330@vitstudent.ac.in",
         "mobile": "+91 98765 43210",
-        "degree": "B.Tech - Electronics and Communication Engineering",
-        "inst": "Vellore Institute of Technology, Chennai",
-        "addr": "Vandalur - Kelambakkam Road, Chennai, Tamil Nadu – 600127, India"
+        "email": "ronil.24bce1330@vitstudent.ac.in",
+        "addr": "School of Electronics Engineering, Vellore Institute of Technology, Chennai, Vandalur - Kelambakkam Road, Chennai – 600127, India"
     },
     {
         "name": "TEJAS",
         "reg": "24BCE1360",
-        "email": "tejas.24bce1360@vitstudent.ac.in",
         "mobile": "+91 98765 43211",
-        "degree": "B.Tech - Electronics and Communication Engineering",
-        "inst": "Vellore Institute of Technology, Chennai",
-        "addr": "Vandalur - Kelambakkam Road, Chennai, Tamil Nadu – 600127, India"
+        "email": "tejas.24bce1360@vitstudent.ac.in",
+        "addr": "School of Electronics Engineering, Vellore Institute of Technology, Chennai, Vandalur - Kelambakkam Road, Chennai – 600127, India"
     },
     {
         "name": "PRIYANSHU",
         "reg": "24BCE1140",
-        "email": "priyanshu.24bce1140@vitstudent.ac.in",
         "mobile": "+91 98765 43212",
-        "degree": "B.Tech - Electronics and Communication Engineering",
-        "inst": "Vellore Institute of Technology, Chennai",
-        "addr": "Vandalur - Kelambakkam Road, Chennai, Tamil Nadu – 600127, India"
+        "email": "priyanshu.24bce1140@vitstudent.ac.in",
+        "addr": "School of Electronics Engineering, Vellore Institute of Technology, Chennai, Vandalur - Kelambakkam Road, Chennai – 600127, India"
     },
     {
         "name": "PRASHANT",
         "reg": "24BCE1118",
-        "email": "prashant.24bce1118@vitstudent.ac.in",
         "mobile": "+91 98765 43213",
-        "degree": "B.Tech - Electronics and Communication Engineering",
-        "inst": "Vellore Institute of Technology, Chennai",
-        "addr": "Vandalur - Kelambakkam Road, Chennai, Tamil Nadu – 600127, India"
+        "email": "prashant.24bce1118@vitstudent.ac.in",
+        "addr": "School of Electronics Engineering, Vellore Institute of Technology, Chennai, Vandalur - Kelambakkam Road, Chennai – 600127, India"
     }
 ]
 
 for s in students_bio:
-    tbl_s = doc.add_table(rows=1, cols=2)
-    tbl_s.alignment = WD_TABLE_ALIGNMENT.CENTER
-    cell_p = tbl_s.cell(0, 0)
-    cell_d = tbl_s.cell(0, 1)
-    cell_p.width = Inches(1.8)
-    cell_d.width = Inches(4.8)
-    
-    set_cell_background(cell_p, "F8FAFC")
-    set_cell_background(cell_d, "FFFFFF")
-    set_cell_margins(cell_p, top=80, bottom=80, left=100, right=100)
-    set_cell_margins(cell_d, top=80, bottom=80, left=120, right=120)
-    
-    # Photo box
-    p_ph = cell_p.paragraphs[0]
-    p_ph.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r_ph = p_ph.add_run("\n\n[Passport Size\nPhoto]\n\n")
+    p_photo = doc.add_paragraph()
+    p_photo.paragraph_format.space_before = Pt(8)
+    p_photo.paragraph_format.space_after = Pt(4)
+    r_ph = p_photo.add_run("[Photo – insert here]")
     r_ph.font.name = "Times New Roman"
-    r_ph.font.size = Pt(10)
+    r_ph.font.size = Pt(11)
     r_ph.font.italic = True
-    r_ph.font.color.rgb = COLOR_MUTED
+    r_ph.font.color.rgb = COLOR_BLACK
     
-    # Details
-    p_dt = cell_d.paragraphs[0]
-    p_dt.paragraph_format.line_spacing = 1.15
-    p_dt.paragraph_format.space_after = Pt(2)
+    p_info = doc.add_paragraph()
+    p_info.paragraph_format.line_spacing = 1.2
+    p_info.paragraph_format.space_before = Pt(0)
+    p_info.paragraph_format.space_after = Pt(14)
     
-    info_lines = [
-        ("Full Name: ", s["name"]),
-        ("Registration Number: ", s["reg"]),
-        ("Degree & Program: ", s["degree"]),
-        ("Institution: ", s["inst"]),
-        ("Official E-mail: ", s["email"]),
-        ("Contact Mobile: ", s["mobile"]),
-        ("Permanent Address: ", s["addr"])
+    lines = [
+        ("Name: ", s["name"] + f" ({s['reg']})\n"),
+        ("Mobile No.: ", s["mobile"] + "\n"),
+        ("E-mail: ", s["email"] + "\n"),
+        ("Permanent Address: ", s["addr"] + "\n")
     ]
-    for lbl, val in info_lines:
-        r_l = p_dt.add_run(lbl)
-        r_l.font.name = "Times New Roman"
-        r_l.font.size = Pt(10)
-        r_l.font.bold = True
+    for lbl, val in lines:
+        rl = p_info.add_run(lbl)
+        rl.font.name = "Times New Roman"
+        rl.font.size = Pt(11)
+        rl.font.bold = True
+        rl.font.color.rgb = COLOR_BLACK
         
-        r_v = p_dt.add_run(val + "\n")
-        r_v.font.name = "Times New Roman"
-        r_v.font.size = Pt(10)
-    
-    # Table border
-    tblPr = tbl_s._tbl.tblPr
-    borders = parse_xml(
-        f'<w:tblBorders {nsdecls("w")}>\n'
-        f'  <w:top w:val="single" w:sz="6" w:space="0" w:color="CBD5E1"/>\n'
-        f'  <w:bottom w:val="single" w:sz="6" w:space="0" w:color="CBD5E1"/>\n'
-        f'  <w:left w:val="single" w:sz="6" w:space="0" w:color="CBD5E1"/>\n'
-        f'  <w:right w:val="single" w:sz="6" w:space="0" w:color="CBD5E1"/>\n'
-        f'  <w:insideH w:val="none"/>\n'
-        f'  <w:insideV w:val="single" w:sz="4" w:space="0" w:color="E2E8F0"/>\n'
-        f'</w:tblBorders>'
-    )
-    tblPr.append(borders)
-    doc.add_paragraph().paragraph_format.space_after = Pt(8)
+        rv = p_info.add_run(val)
+        rv.font.name = "Times New Roman"
+        rv.font.size = Pt(11)
+        rv.font.color.rgb = COLOR_BLACK
 
-# Save Document
-print(f"Saving DOCX to {docx_path}...")
+# Save DOCX
+print(f"Saving Monochrome DOCX to {docx_path}...")
 doc.save(docx_path)
-print("DOCX successfully generated!")
+print("DOCX successfully generated and saved!")
